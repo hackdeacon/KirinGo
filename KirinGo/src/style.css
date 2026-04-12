@@ -1,0 +1,375 @@
+@import "tailwindcss";
+
+/* ============================================
+   KirinGo 设计系统 - Cursor / Warm Minimalist 风格
+   严格对齐 DESIGN.md
+   ============================================ */
+
+@theme {
+  /* 基础色彩 - Cursor Style */
+  --color-primary: #f54e00; /* Cursor Orange */
+  --color-accent: #f54e00;
+  --color-error: #cf2d56;
+  --color-success: #1f8a65;
+
+  /* Warm Canvas & Surfaces */
+  --color-bg-canvas: #f2f1ed; /* Cursor Cream */
+  --color-bg-surface-100: #f7f7f4;
+  --color-bg-surface-200: #f2f1ed;
+  --color-bg-surface-300: #ebeae5;
+  --color-bg-surface-400: #e6e5e0;
+  --color-bg-surface-500: #e1e0db;
+
+  /* Typography Colors */
+  --color-text-primary: #26251e; /* Cursor Dark */
+  --color-text-secondary: rgba(38, 37, 30, 0.55);
+  --color-text-tertiary: rgba(38, 37, 30, 0.4);
+  --color-text-inverse: #f2f1ed;
+
+  /* Borders - oklab inspired rgba fallbacks */
+  --color-border: rgba(38, 37, 30, 0.1);
+  --color-border-medium: rgba(38, 37, 30, 0.2);
+  --color-border-strong: rgba(38, 37, 30, 0.55);
+
+  /* Typography Scale - Core sizes per DESIGN.md */
+  --font-size-hero: 72px;
+  --font-size-heading: 36px;
+  --font-size-subheading: 26px;
+  --font-size-title-sm: 22px;
+  --font-size-body-serif: 19.2px;
+  --font-size-body-serif-sm: 17.28px;
+  --font-size-body-sans: 16px;
+  --font-size-button: 14px;
+  --font-size-caption: 11px;
+  --font-size-mono: 12px;
+  --font-size-micro: 11px;
+
+  /* Line Heights */
+  --leading-hero: 1.10;
+  --leading-heading: 1.20;
+  --leading-subheading: 1.25;
+  --leading-title-sm: 1.30;
+  --leading-body: 1.50;
+  --leading-body-sm: 1.35;
+  --leading-tight: 1.00;
+
+  /* Letter Spacing - Signature CursorGothic tracking */
+  --tracking-hero: -2.16px;
+  --tracking-heading: -0.72px;
+  --tracking-subheading: -0.325px;
+  --tracking-title-sm: -0.11px;
+  --tracking-mono: -0.275px;
+
+  /* 阴影 - Diffused atmospheric shadows */
+  --shadow-sm: 0 1px 2px rgba(38, 37, 30, 0.04);
+  --shadow-md: 0 4px 12px rgba(38, 37, 30, 0.08);
+  --shadow-cursor-elevated: rgba(0,0,0,0.14) 0px 28px 70px, rgba(0,0,0,0.1) 0px 14px 32px;
+  --shadow-focus: rgba(0,0,0,0.1) 0px 4px 12px;
+
+  /* 字体 - CursorGothic + jjannon + berkeleyMono fallbacks */
+  --font-sans: 'system-ui', '-apple-system', 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
+  --font-display: 'CursorGothic', 'system-ui', 'sans-serif';
+  --font-serif: 'jjannon', 'Iowan Old Style', 'Palatino Linotype', 'Georgia', serif;
+  --font-mono: 'berkeleyMono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace;
+
+  /* 间距与圆角 */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px; /* Standard: Primary buttons, cards */
+  --radius-lg: 10px; /* Featured cards */
+  --radius-pill: 9999px; /* Pill buttons, tags */
+}
+
+/* 全局基础设置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg-canvas);
+  color: var(--color-text-primary);
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg-canvas);
+  min-height: 100vh;
+  line-height: var(--leading-body);
+  font-size: var(--font-size-body-sans);
+}
+
+h1, h2, h3, .text-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+.text-serif {
+  font-family: var(--font-serif);
+  font-variant-ligatures: common-ligatures;
+}
+
+.text-mono {
+  font-family: var(--font-mono);
+}
+
+/* 滚动条美化 - Warm Minimalist */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(38, 37, 30, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(38, 37, 30, 0.2);
+}
+
+/* ============================================
+   按钮组件 - Cursor Buttons
+   ============================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: var(--font-size-button);
+  font-family: var(--font-display);
+  font-weight: 400;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  user-select: none;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-surface-300);
+}
+
+.btn:hover {
+  color: var(--color-error);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+.btn-primary {
+  background-color: var(--color-bg-surface-300);
+  color: var(--color-text-primary);
+}
+
+.btn-secondary {
+  background-color: var(--color-bg-surface-400);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-pill);
+  padding: 3px 12px;
+}
+
+.btn-orange {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.btn-orange:hover {
+  filter: brightness(1.1);
+  color: white;
+}
+
+.btn-ghost {
+  background: rgba(38, 37, 30, 0.06);
+  color: var(--color-text-secondary);
+}
+
+/* Pill Link - Signature Cursor Tag Style */
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  font-size: var(--font-size-button);
+  font-family: var(--font-display);
+  background: var(--color-bg-surface-400);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-pill);
+  transition: all 0.15s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.tag-pill:hover {
+  color: var(--color-error);
+}
+
+.tag-pill-active {
+  background: var(--color-bg-surface-500);
+  color: var(--color-text-primary);
+}
+
+/* ============================================
+   卡片组件
+   ============================================ */
+
+.card {
+  background-color: var(--color-bg-surface-400);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.card-elevated {
+  box-shadow: var(--shadow-cursor-elevated);
+}
+
+.card-hover:hover {
+  box-shadow: var(--shadow-cursor-elevated);
+}
+
+/* ============================================
+   表单元素
+   ============================================ */
+
+.input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  padding: 8px 12px;
+  font-size: var(--font-size-body-sans);
+  font-family: var(--font-sans);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.input:focus {
+  border-color: var(--color-border-medium);
+}
+
+.select {
+  width: 100%;
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  padding: 8px 32px 8px 12px;
+  font-size: var(--font-size-button);
+  font-family: var(--font-display);
+  outline: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2326251e' fill-opacity='0.55' d='M1.41.59L6 5.17 10.59.59 12 2 6 8 0 2z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+/* ============================================
+   动画效果
+   ============================================ */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ============================================
+   Typography Utility Classes
+   ============================================ */
+
+.text-hero {
+  font-family: var(--font-display);
+  font-size: var(--font-size-hero);
+  line-height: var(--leading-hero);
+  letter-spacing: var(--tracking-hero);
+}
+
+.text-heading {
+  font-family: var(--font-display);
+  font-size: var(--font-size-heading);
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-heading);
+}
+
+.text-subheading {
+  font-family: var(--font-display);
+  font-size: var(--font-size-subheading);
+  line-height: var(--leading-subheading);
+  letter-spacing: var(--tracking-subheading);
+}
+
+.text-body-serif {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-body-serif-sm);
+  line-height: var(--leading-body-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ============================================
+   Layout Utilities
+   ============================================ */
+
+.container-cursor {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ============================================
+   Dark Mode Theme - Warm Minimalist
+   Following DESIGN.md: Inverts the light palette while keeping warm yellow-brown undertones
+   Never pure black/white - maintain the Cursor warm aesthetic
+   ============================================ */
+
+html.dark {
+  /* Backgrounds - warm dark charcoal with yellow undertones
+   Inverse of the light mode surface scale
+   Surface 200 in dark = Cursor Dark (#26251e) from light mode */
+  --color-bg-canvas: #12110c;
+  --color-bg-surface-100: #1a1912;
+  --color-bg-surface-200: #212018;
+  --color-bg-surface-300: #26251e;
+  --color-bg-surface-400: #2b2a24;
+  --color-bg-surface-500: #302f29;
+
+  /* Text - warm off-white (inverse of Cursor Dark)
+   Same alpha values as light mode, just inverted base */
+  --color-text-primary: #f2f1ed;
+  --color-text-secondary: rgba(242, 241, 237, 0.55);
+  --color-text-tertiary: rgba(242, 241, 237, 0.4);
+  --color-text-inverse: #26251e;
+
+  /* Borders - following DESIGN.md oklab/warm brown principles
+   Slightly higher alpha for visibility in dark mode */
+  --color-border: rgba(242, 241, 237, 0.12);
+  --color-border-medium: rgba(242, 241, 237, 0.2);
+  --color-border-strong: rgba(242, 241, 237, 0.55);
+
+  /* Brand colors (primary, error, success) remain unchanged per DESIGN.md */
+}
+
+/* Smooth transition when switching themes */
+html {
+  transition: background-color 0.3s ease;
+}
