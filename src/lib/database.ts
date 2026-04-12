@@ -586,11 +586,15 @@ export async function markConversationRead(conversationId: string, role: UserRol
   // Guard: only update if there are unread messages to avoid redundant writes
   const { data, error: checkError } = await supabase
     .from('conversations')
-    .select(field)
+    .select('recruiter_unread, jobseeker_unread')
     .eq('id', conversationId)
     .single()
 
-  if (checkError || (data && data[field] === 0)) return
+  if (checkError || !data) return
+
+  // Use type casting to safely access the unread count
+  const unreadCount = (data as Record<string, any>)[field]
+  if (unreadCount === 0) return
 
   const { error } = await supabase
     .from('conversations')
