@@ -75,6 +75,7 @@ export interface ResumeEducation {
   major: string
   start: string
   end: string
+  current?: boolean
 }
 
 export interface ResumeExperience {
@@ -83,6 +84,7 @@ export interface ResumeExperience {
   start: string
   end: string
   description: string
+  current?: boolean
 }
 
 export interface ResumeProject {
@@ -91,6 +93,7 @@ export interface ResumeProject {
   description: string
   start: string
   end: string
+  current?: boolean
 }
 
 export interface ResumeAISuggestion {
