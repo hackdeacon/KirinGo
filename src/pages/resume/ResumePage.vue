@@ -599,7 +599,8 @@ async function ensureResumeLoaded() {
       // Ensure new fields exist on older resumes
       if (!existing.basic_info.github) existing.basic_info.github = ''
       if (!existing.basic_info.website) existing.basic_info.website = ''
-      if (!('birthday' in existing.basic_info)) existing.basic_info.birthday = ''
+      if (!existing.basic_info.birthday) existing.basic_info.birthday = ''
+
       resume.value = existing
       // Add current flag for items that end with "至今"
       ;(resume.value.experience as ExperienceWithCurrent[]).forEach(exp => {
