@@ -135,7 +135,8 @@
             </div>
             <div class="msg-bubble">
               <div class="msg-role">{{ msg.role === 'ai' ? 'AI 面试官' : '我' }}</div>
-              <div class="msg-content">{{ msg.content }}</div>
+              <div v-if="msg.role === 'ai'" class="msg-content" v-html="renderMarkdown(msg.content)"></div>
+              <div v-else class="msg-content">{{ msg.content }}</div>
             </div>
           </div>
 
@@ -197,7 +198,7 @@
           </div>
           <div class="feedback-summary">
             <h4>总体评价</h4>
-            <p>{{ feedback.overall }}</p>
+            <div v-html="renderMarkdown(feedback.overall)"></div>
           </div>
           <div class="feedback-sections">
             <div class="feedback-section strengths">
@@ -225,12 +226,23 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
+import { marked } from 'marked'
 import { createInterview, fetchInterviews, fetchUserResume, updateInterview } from '@/lib/database'
 import { useAuthStore } from '@/stores/auth'
 import { useJobStore } from '@/stores/jobs'
 import { useToast } from '@/composables/useToast'
 import AppAvatar from '@/components/AppAvatar.vue'
 import type { Interview, InterviewMessage } from '@/types'
+
+// Configure marked for clean rendering
+marked.setOptions({
+  breaks: true, // Enable line breaks
+  gfm: true,    // Enable GitHub Flavored Markdown
+})
+
+function renderMarkdown(content: string): string {
+  return marked.parse(content) as string
+}
 
 const authStore = useAuthStore()
 const jobStore = useJobStore()
@@ -1122,6 +1134,77 @@ onMounted(() => {
   font-size: 17px;
   line-height: 1.5;
   letter-spacing: -0.374px;
+}
+
+/* Markdown styles for AI messages */
+.msg-content :deep(h1),
+.msg-content :deep(h2),
+.msg-content :deep(h3),
+.msg-content :deep(h4) {
+  font-weight: 600;
+  margin: 16px 0 8px 0;
+  line-height: 1.3;
+}
+
+.msg-content :deep(h1) { font-size: 20px; }
+.msg-content :deep(h2) { font-size: 19px; }
+.msg-content :deep(h3) { font-size: 18px; }
+.msg-content :deep(h4) { font-size: 17px; }
+
+.msg-content :deep(p) {
+  margin-bottom: 12px;
+}
+
+.msg-content :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.msg-content :deep(ul),
+.msg-content :deep(ol) {
+  margin: 12px 0;
+  padding-left: 24px;
+}
+
+.msg-content :deep(li) {
+  margin: 6px 0;
+}
+
+.msg-content :deep(code) {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.msg-content :deep(pre) {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 12px 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.msg-content :deep(pre code) {
+  background: none;
+  padding: 0;
+}
+
+.msg-content :deep(blockquote) {
+  border-left: 4px solid var(--color-border);
+  padding-left: 12px;
+  margin: 12px 0;
+  opacity: 0.8;
+}
+
+.msg-content :deep(a) {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.msg-content :deep(strong) {
+  font-weight: 600;
 }
 
 /* 打字动画 */
