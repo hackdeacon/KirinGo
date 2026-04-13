@@ -97,32 +97,34 @@
       <!-- 右侧: 职位/个人详情 (1/3) -->
       <aside class="job-info-sidebar" v-if="conversation?.job">
         <div class="sidebar-inner">
-          <div class="job-info-section">
-            <div class="section-label text-mono">JOB DETAILS</div>
-            <h2 class="job-title text-display mt-2">{{ conversation.job.title }}</h2>
-            <div class="job-meta-row mt-4">
-              <span class="job-salary text-mono">{{ conversation.job.salary_min }}-{{ conversation.job.salary_max }}K</span>
-              <span class="job-company text-serif">{{ conversation.job.company?.name }}</span>
-            </div>
-            <div class="job-badges mt-6">
-              <span class="job-badge text-mono">{{ conversation.job.city }}</span>
-              <span class="job-badge text-mono">{{ conversation.job.experience }}</span>
-              <span class="job-badge text-mono">{{ conversation.job.education }}</span>
-            </div>
-          </div>
-
-          <div class="job-info-section" v-if="conversation.job.company">
-            <div class="section-label text-mono">COMPANY</div>
-            <div class="company-card mt-4">
-              <div class="company-logo">{{ conversation.job.company.name.charAt(0) }}</div>
-              <div class="company-info">
-                <div class="company-name text-display">{{ conversation.job.company.name }}</div>
-                <div class="company-meta text-mono">{{ conversation.job.company.industry }} · {{ conversation.job.company.scale }}</div>
+          <div class="sidebar-content">
+            <div class="job-info-section">
+              <div class="section-label text-mono">JOB DETAILS</div>
+              <h2 class="job-title text-display mt-2">{{ conversation.job.title }}</h2>
+              <div class="job-meta-row mt-4">
+                <span class="job-salary text-mono">{{ conversation.job.salary_min }}-{{ conversation.job.salary_max }}K</span>
+                <span class="job-company text-serif">{{ conversation.job.company?.name }}</span>
+              </div>
+              <div class="job-badges mt-6">
+                <span class="job-badge text-mono">{{ conversation.job.city }}</span>
+                <span class="job-badge text-mono">{{ conversation.job.experience }}</span>
+                <span class="job-badge text-mono">{{ conversation.job.education }}</span>
               </div>
             </div>
-            <p class="company-desc text-serif mt-4" v-if="conversation.job.company.description">
-              {{ conversation.job.company.description }}
-            </p>
+
+            <div class="job-info-section" v-if="conversation.job.company">
+              <div class="section-label text-mono">COMPANY</div>
+              <div class="company-card mt-4">
+                <div class="company-logo">{{ conversation.job.company.name.charAt(0) }}</div>
+                <div class="company-info">
+                  <div class="company-name text-display">{{ conversation.job.company.name }}</div>
+                  <div class="company-meta text-mono">{{ conversation.job.company.industry }} · {{ conversation.job.company.scale }}</div>
+                </div>
+              </div>
+              <p class="company-desc text-serif mt-4" v-if="conversation.job.company.description">
+                {{ conversation.job.company.description }}
+              </p>
+            </div>
           </div>
 
           <div class="sidebar-actions">
@@ -319,9 +321,10 @@ onUnmounted(() => {
 }
 
 .job-info-sidebar {
-  width: 300px; /* 固宽 */
+  width: 320px; /* 固宽，适当加宽提升可读性 */
   flex-shrink: 0;
   background-color: var(--color-bg-canvas);
+  border-left: 1px solid oklab(0.263084 -0.00230259 0.0124794 / 0.1);
   overflow-y: auto;
 }
 
@@ -562,10 +565,36 @@ onUnmounted(() => {
 
 /* 右侧边栏内容 */
 .sidebar-inner {
+  height: 100%;
   padding: 32px 24px;
   display: flex;
   flex-direction: column;
-  gap: 48px;
+}
+
+.sidebar-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: oklab(0.263084 -0.00230259 0.0124794 / 0.1);
+  border-radius: 2px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: oklab(0.263084 -0.00230259 0.0124794 / 0.2);
 }
 
 .section-label {
@@ -606,7 +635,7 @@ onUnmounted(() => {
   padding: 4px 10px;
   background-color: var(--color-bg-surface-100);
   border: 1px solid oklab(0.263084 -0.00230259 0.0124794 / 0.05);
-  border-radius: 4px;
+  border-radius: 9999px;
   font-size: 10px;
   color: var(--color-text-tertiary);
 }
@@ -615,13 +644,17 @@ onUnmounted(() => {
   display: flex;
   gap: 12px;
   align-items: center;
+  padding: 16px;
+  background-color: var(--color-bg-surface-100);
+  border: 1px solid oklab(0.263084 -0.00230259 0.0124794 / 0.08);
+  border-radius: 12px;
 }
 
 .company-logo {
   width: 48px;
   height: 48px;
-  background-color: var(--color-text-primary);
-  color: var(--color-bg-canvas);
+  background-color: var(--color-primary);
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -644,6 +677,24 @@ onUnmounted(() => {
   font-size: 14px;
   line-height: 1.6;
   color: var(--color-text-secondary);
+}
+
+/* 底部操作按钮 */
+.sidebar-actions {
+  padding-top: 24px;
+  border-top: 1px solid oklab(0.263084 -0.00230259 0.0124794 / 0.08);
+}
+
+.sidebar-actions .btn-primary-v2 {
+  display: block;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.sidebar-actions .btn-primary-v2:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
 /* 空状态 */

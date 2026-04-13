@@ -177,23 +177,24 @@ onMounted(() => {
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .search-icon {
   position: absolute;
-  left: 10px;
+  left: 12px;
   color: var(--color-text-tertiary);
   pointer-events: none;
 }
 
 .search-input {
   width: 100%;
-  padding: 6px 12px 6px 32px;
+  padding: 10px 14px 10px 36px;
   background-color: var(--color-bg-surface-100);
   border: 1px solid oklab(0.263084 -0.00230259 0.0124794 / 0.1);
-  border-radius: 6px;
-  font-size: 11px;
+  border-radius: 9999px;
+  font-size: 13px;
+  line-height: 1.4;
   color: var(--color-text-primary);
   outline: none;
   transition: all 0.2s;
@@ -201,8 +202,8 @@ onMounted(() => {
 
 .search-input:focus {
   background-color: var(--color-bg-canvas);
-  border-color: oklab(0.263084 -0.00230259 0.0124794 / 0.2);
-  box-shadow: var(--shadow-sm);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
 }
 
 .filters-row {
@@ -211,11 +212,11 @@ onMounted(() => {
 }
 
 .filter-pill {
-  padding: 2px 8px;
-  font-size: 9px;
+  padding: 6px 12px;
+  font-size: 11px;
   color: var(--color-text-tertiary);
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   border-radius: var(--radius-pill);
   cursor: pointer;
   transition: all 0.15s;
@@ -224,11 +225,14 @@ onMounted(() => {
 
 .filter-pill:hover {
   color: var(--color-error);
+  background-color: var(--color-bg-surface-100);
+  border-color: oklab(0.263084 -0.00230259 0.0124794 / 0.05);
 }
 
 .filter-pill.active {
   color: var(--color-text-primary);
-  background-color: var(--color-bg-surface-300);
+  background-color: var(--color-bg-surface-100);
+  border-color: oklab(0.263084 -0.00230259 0.0124794 / 0.1);
 }
 
 /* Scroll Area */

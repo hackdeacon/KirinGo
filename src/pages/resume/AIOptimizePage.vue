@@ -148,7 +148,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { createDefaultResume, fetchUserResume, saveResume } from '@/lib/database'
-import { invokeEdgeFunction } from '@/lib/supabase'
+import { callLLMStream, LLM_API_KEY } from '@/lib/llmStream'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
 import type { Resume, ResumeAISuggestion } from '@/types'
@@ -198,6 +198,11 @@ async function loadResume() {
 async function startOptimize() {
   if (!resume.value) return
 
+  if (!LLM_API_KEY) {
+    toast.error('LLM API Key 未配置，请检查 .env 文件 (需要 VITE_CHATANYWHERE_API_KEY 或 VITE_DEEPSEEK_API_KEY 或 VITE_OPENROUTER_API_KEY)')
+    return
+  }
+
   optimizing.value = true
   currentStep.value = 1
   analyzeIndex.value = -1
@@ -209,23 +214,51 @@ async function startOptimize() {
   }, 800)
 
   try {
-    const result = await invokeEdgeFunction<{
-      score: number
-      optimized_evaluation: string
-      suggestions: ResumeAISuggestion[]
-      overall_feedback: string
-    }>('optimizeResume', {
-      resume: resume.value,
-    })
+    const systemPrompt = `你是一位资深的人力资源专家和简历优化师。你的任务是分析求职者的简历，给出专业的优化建议和优化后的内容。
+
+请从以下维度进行分析：
+1. 自我评价是否突出个人价值
+2. 工作经历描述是否量化、有说服力
+3. 项目经历是否突出技术亮点和成果
+4. 技能是否按照重要程度排序
+5. 整体结构是否符合行业最佳实践
+
+返回 JSON 格式的优化建议。`
+
+    const userPrompt = `请分析并优化以下简历内容：
+
+姓名：${resume.value.basic_info?.name}
+自我评价：${resume.value.self_evaluation}
+工作经历：${JSON.stringify(resume.value.experience)}
+项目经历：${JSON.stringify(resume.value.projects)}
+技能：${resume.value.skills?.join(', ')}
+
+请以以下 JSON 格式返回：
+{
+  "score": 简历评分(0-100),
+  "optimized_evaluation": "优化后的自我评价",
+  "suggestions": [
+    {
+      "category": "分类(自我评价/工作经历/项目经历/技能描述)",
+      "original": "原文",
+      "optimized": "优化后的文本",
+      "reason": "优化原因"
+    }
+  ],
+  "overall_feedback": "总体反馈"
+}`
+
+    const resultText = await callLLMStream(systemPrompt, userPrompt, true)
+    const result = JSON.parse(resultText)
 
     optimizedScore.value = result.score
     optimizedEvaluation.value = result.optimized_evaluation || ''
-    suggestions.value = (result.suggestions || []).map(item => ({
+    suggestions.value = (result.suggestions || []).map((item: ResumeAISuggestion) => ({
       ...item,
       applied: false,
     }))
     analyzeIndex.value = analyzeSteps.length - 1
-    
+
     // 延迟进入下一步，确保用户看到最后一个勾选
     setTimeout(() => {
       currentStep.value = 2
@@ -278,7 +311,14 @@ function applySuggestion(index: number) {
 }
 
 async function saveOptimized() {
-  if (!authStore.user || !resume.value) return
+  if (!authStore.user) {
+    toast.error('请先登录')
+    return
+  }
+  if (!resume.value) {
+    toast.error('简历数据不存在，请刷新重试')
+    return
+  }
 
   try {
     // 所有采纳的修改已经实时应用到 resume.value 了
@@ -291,6 +331,7 @@ async function saveOptimized() {
       ai_score: optimizedScore.value,
       ai_suggestions: suggestions.value.map(({ applied, ...rest }) => rest),
     })
+
     resume.value = updatedResume
     originalScore.value = resume.value.ai_score
     toast.success('优化后的简历已保存！返回简历即可看到更新')
@@ -306,7 +347,7 @@ onMounted(() => {
 
 <style scoped>
 .ai-optimize-page {
-  padding: 60px 0 120px;
+  padding: 60px 0 180px;
   background-color: var(--color-bg-canvas);
 }
 
@@ -578,14 +619,14 @@ onMounted(() => {
 /* 底部栏 */
 .sticky-action-bar {
   position: fixed;
-  bottom: 0;
+  bottom: env(safe-area-inset-bottom);
   left: 0;
   right: 0;
-  padding: 24px 0;
+  padding: 24px 0 calc(24px + env(safe-area-inset-bottom));
   background: rgba(242, 241, 237, 0.8);
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--color-border);
-  z-index: 100;
+  z-index: 200;
 }
 
 .flex-center-x { display: flex; justify-content: center; align-items: center; }

@@ -18,7 +18,7 @@
 
 ### 🧠 AI 智能内核 (Supabase Edge Functions + LLM)
 - **AI 简历优化 (Optimize)**：根据目标职位实时扫描简历，提供打分建议并精准润色，将面试邀约率提升 3 倍。
-- **AI 模拟面试 (Interview)**：基于 Deno 边缘函数实现的实时面试助手，模拟真实面试逻辑并给出分维度表现评估。
+- **AI 模拟面试 (Interview)**：前端直连 DeepSeek API 的实时面试助手，模拟真实面试逻辑并给出分维度表现评估。
 - **AI 职位匹配 (Match)**：利用 pgvector 实现语义搜索，不再局限于关键词，而是深度理解求职者意图与职位描述的契合度。
 - **AI 沟通助手 (Chat assistant)**：在即时通信中提供 AI 辅助回复建议，提升求职者与 HR 的沟通专业度。
 
@@ -64,6 +64,24 @@ VITE_SUPABASE_ANON_KEY=你的Supabase匿名Key
 ```bash
 npm run dev
 ```
+
+### 4. 配置 AI 模拟面试（DeepSeek）
+AI 模拟面试现在不依赖 Supabase Edge Function，直接读取前端环境变量：
+
+```env
+VITE_INTERVIEW_API_KEY=你的ChatAnywhereKey
+VITE_INTERVIEW_API_BASE_URL=https://api.chatanywhere.tech/v1
+VITE_INTERVIEW_MODEL=gpt-4o-mini
+
+# 兼容旧配置（可选）
+VITE_DEEPSEEK_API_KEY=你的DeepSeekKey
+VITE_DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+VITE_DEEPSEEK_MODEL=deepseek-chat
+```
+
+说明：
+- 默认优先使用 ChatAnywhere (`https://api.chatanywhere.tech/v1`)。
+- `VITE_INTERVIEW_*` 为主配置；若没配 key，会回退 `VITE_CHATANYWHERE_API_KEY` 与 `VITE_DEEPSEEK_API_KEY`。
 
 ---
 

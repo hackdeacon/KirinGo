@@ -175,7 +175,7 @@ import {
   fetchApplicationForJob,
   fetchUserResume,
 } from '@/lib/database'
-import { invokeEdgeFunction } from '@/lib/supabase'
+import { callLLMStream, LLM_API_KEY } from '@/lib/llmStream'
 import { useJobStore } from '@/stores/jobs'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
@@ -235,6 +235,12 @@ function formatText(text: string): string {
 async function analyzeMatch() {
   if (!authStore.user || !job.value) return
 
+  if (!LLM_API_KEY) {
+    toast.error('LLM API Key 未配置，请检查 .env 文件 (需要 VITE_CHATANYWHERE_API_KEY 或 VITE_DEEPSEEK_API_KEY 或 VITE_OPENROUTER_API_KEY)')
+    matchScore.value = null
+    return
+  }
+
   resume.value = await fetchUserResume(authStore.user.id)
   if (!resume.value) {
     matchScore.value = null
@@ -242,20 +248,40 @@ async function analyzeMatch() {
   }
 
   try {
-    const result = await invokeEdgeFunction<AIMatchResult>('matchResumeJob', {
-      resume: resume.value,
-      job: {
-        title: job.value.title,
-        company_name: job.value.company?.name || '',
-        city: job.value.city,
-        salary_min: job.value.salary_min,
-        salary_max: job.value.salary_max,
-        requirements: job.value.requirements,
-        tags: job.value.tags,
-        experience: job.value.experience,
-        education: job.value.education,
-      },
-    })
+    const systemPrompt = `你是一位专业的 HR，请分析求职者简历与职位的匹配度。请从四个维度评估匹配度并返回 JSON 格式。`
+
+    const userPrompt = `职位信息：
+职位名称：${job.value.title}
+公司：${job.value.company?.name || ''}
+工作地点：${job.value.city || '不限'}
+薪资范围：${job.value.salary_min || 0} - ${job.value.salary_max || 0}
+要求：${job.value.requirements || ''}
+期望经验：${job.value.experience || '不限'}
+期望学历：${job.value.education || '不限'}
+标签：${job.value.tags?.join(', ') || ''}
+
+求职者简历：
+姓名：${resume.value.basic_info?.name || ''}
+自我评价：${resume.value.self_evaluation || ''}
+工作经历：${JSON.stringify(resume.value.experience || [])}
+项目经历：${JSON.stringify(resume.value.projects || [])}
+教育经历：${JSON.stringify(resume.value.education || [])}
+技能：${resume.value.skills?.join(', ') || ''}
+
+请你从以下四个维度评估匹配度，每个维度给出 0-100 的分数，并计算总分（总分也是 0-100）。
+返回 JSON 格式如下：
+{
+  "score": 总分(0-100),
+  "dimensions": {
+    "skills": 技能匹配度分数(0-100),
+    "experience": 经验匹配度分数(0-100),
+    "education": 学历匹配度分数(0-100),
+    "location": 地点匹配度分数(0-100)
+  }
+}`
+
+    const resultText = await callLLMStream(systemPrompt, userPrompt, true)
+    const result = JSON.parse(resultText) as AIMatchResult
 
     matchScore.value = result.score
     matchDimensions.value = {
@@ -267,6 +293,7 @@ async function analyzeMatch() {
   } catch (error) {
     console.error('Match analysis error:', error)
     matchScore.value = null
+    toast.error(`匹配分析失败：${error instanceof Error ? error.message : '请稍后重试'}`)
   }
 }
 

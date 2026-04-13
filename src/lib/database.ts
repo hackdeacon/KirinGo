@@ -334,21 +334,60 @@ export async function createDefaultResume(user: Profile) {
 export async function saveResume(userId: string, updates: Partial<Resume> & { basic_info: Resume['basic_info'] }) {
   ensureConfigured()
 
-  const { data, error } = await supabase
+  // 先检查是否已存在简历
+  const { data: existingList, error: findError } = await supabase
     .from('resumes')
-    .upsert({
-      user_id: userId,
-      ...updates,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id' })
-    .select('*')
-    .single()
+    .select('id')
+    .eq('user_id', userId)
+    .limit(1)
 
-  if (error) {
-    throw error
+  if (findError) {
+    throw findError
   }
 
-  return data as Resume
+  const existing = existingList && existingList.length > 0 ? existingList[0] : null
+
+  if (existing) {
+    // 更新现有简历
+    const { data, error } = await supabase
+      .from('resumes')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', existing.id)
+      .select('*')
+
+    if (error) {
+      throw error
+    }
+
+    return data[0] as Resume
+  } else {
+    // 插入新简历
+    const { data, error } = await supabase
+      .from('resumes')
+      .insert({
+        user_id: userId,
+        ...updates,
+        updated_at: new Date().toISOString(),
+        title: '我的简历',
+        education: [],
+        experience: [],
+        skills: [],
+        projects: [],
+        certificates: [],
+        is_default: true,
+      })
+      .select('*')
+      .single()
+
+    if (error) {
+      throw error
+    }
+
+    return data as Resume
+  }
 }
 
 export async function uploadResumeFile(userId: string, file: File) {

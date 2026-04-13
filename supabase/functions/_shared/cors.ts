@@ -13,11 +13,21 @@ export const corsHeaders = {
 export async function callLLM(
   systemPrompt: string,
   userPrompt: string,
-  options: { temperature?: number; json?: boolean } = {}
+  options: {
+    temperature?: number
+    json?: boolean
+    apiKey?: string
+    model?: string
+    baseUrl?: string
+  } = {}
 ): Promise<string> {
-  const apiKey = Deno.env.get('OPENAI_API_KEY') || ''
-  const model = Deno.env.get('LLM_MODEL') || 'gpt-4o-mini'
-  const baseUrl = Deno.env.get('OPENAI_BASE_URL') || 'https://api.openai.com/v1'
+  const apiKey = options.apiKey || Deno.env.get('OPENAI_API_KEY') || ''
+  const model = options.model || Deno.env.get('LLM_MODEL') || 'gpt-4o-mini'
+  const baseUrl = options.baseUrl || Deno.env.get('OPENAI_BASE_URL') || 'https://api.openai.com/v1'
+
+  if (!apiKey) {
+    throw new Error('LLM API Key 未配置')
+  }
 
   const isGemini = baseUrl.includes('generativelanguage.googleapis.com')
 

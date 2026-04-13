@@ -10,80 +10,84 @@
 
       <!-- 未开始面试 -->
       <div v-if="!interviewStarted" class="start-section animate-fade-in-up">
-        <!-- 选择职位 -->
-        <div class="card select-card">
-          <h3 class="card-heading">选择面试职位</h3>
+        <div class="start-grid">
+          <!-- 选择职位 -->
+          <div class="card select-card">
+            <h3 class="card-heading">选择面试职位</h3>
 
-          <div class="job-select-mode">
-            <label class="mode-radio">
-              <input type="radio" value="existing" v-model="jobSelectMode">
-              <span>从我的职位中选择</span>
-            </label>
-            <label class="mode-radio">
-              <input type="radio" value="custom" v-model="jobSelectMode">
-              <span>自定义面试职位</span>
-            </label>
+            <div class="job-select-mode">
+              <label class="mode-radio">
+                <input type="radio" value="existing" v-model="jobSelectMode">
+                <span>从我的职位中选择</span>
+              </label>
+              <label class="mode-radio">
+                <input type="radio" value="custom" v-model="jobSelectMode">
+                <span>自定义面试职位</span>
+              </label>
+            </div>
+
+            <div v-if="jobSelectMode === 'existing'" class="job-selection-content">
+              <div class="job-select-container" v-if="availableJobs.length">
+                <div class="job-select-grid">
+                  <button
+                    v-for="job in availableJobs"
+                    :key="job.id"
+                    class="job-select-btn"
+                    :class="{ selected: selectedJobId === job.id }"
+                    @click="selectedJobId = job.id"
+                  >
+                    <div class="job-select-title">{{ job.title }}</div>
+                    <div class="job-select-company">{{ job.company?.name }}</div>
+                  </button>
+                </div>
+              </div>
+              <div v-else class="empty-jobs">
+                <p class="empty-jobs-text">您还没有发布过职位，可以使用自定义职位功能开始面试</p>
+              </div>
+            </div>
+
+            <div v-if="jobSelectMode === 'custom'" class="job-selection-content custom-job-form">
+              <div class="form-group">
+                <label class="form-label">职位名称</label>
+                <input v-model="customJobTitle" class="input" placeholder="例如：前端开发工程师" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">职位描述/要求</label>
+                <textarea v-model="customJobDescription" class="input" rows="4" placeholder="简要描述这个职位的主要职责和要求..."></textarea>
+              </div>
+            </div>
           </div>
 
-          <div v-if="jobSelectMode === 'existing'">
-            <div class="job-select-grid" v-if="availableJobs.length">
-              <button
-                v-for="job in availableJobs"
-                :key="job.id"
-                class="job-select-btn"
-                :class="{ selected: selectedJobId === job.id }"
-                @click="selectedJobId = job.id"
-              >
-                <div class="job-select-title">{{ job.title }}</div>
-                <div class="job-select-company">{{ job.company?.name }}</div>
-              </button>
+          <!-- 面试设置 -->
+          <div class="card settings-card">
+            <h3 class="card-heading">面试设置</h3>
+            <div class="settings-grid">
+              <div class="setting-item">
+                <label class="form-label">面试类型</label>
+                <select v-model="interviewType" class="select" id="interview-type">
+                  <option value="technical">技术面试</option>
+                  <option value="behavioral">行为面试</option>
+                  <option value="comprehensive">综合面试</option>
+                </select>
+              </div>
+              <div class="setting-item">
+                <label class="form-label">难度等级</label>
+                <select v-model="difficulty" class="select" id="interview-difficulty">
+                  <option value="easy">初级</option>
+                  <option value="medium">中级</option>
+                  <option value="hard">高级</option>
+                </select>
+              </div>
             </div>
-            <div v-else class="empty-jobs">
-              <p class="empty-jobs-text">您还没有发布过职位，可以使用自定义职位功能开始面试</p>
-            </div>
+            <button
+              class="btn btn-primary btn-lg btn-block"
+              @click="startInterview"
+              :disabled="!canStartInterview"
+              id="start-interview-btn"
+            >
+              🎯 开始模拟面试
+            </button>
           </div>
-
-          <div v-if="jobSelectMode === 'custom'" class="custom-job-form">
-            <div class="form-group">
-              <label class="form-label">职位名称</label>
-              <input v-model="customJobTitle" class="input" placeholder="例如：前端开发工程师" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">职位描述/要求</label>
-              <textarea v-model="customJobDescription" class="input" rows="4" placeholder="简要描述这个职位的主要职责和要求..."></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- 面试设置 -->
-        <div class="card settings-card">
-          <h3 class="card-heading">面试设置</h3>
-          <div class="settings-grid">
-            <div class="setting-item">
-              <label class="form-label">面试类型</label>
-              <select v-model="interviewType" class="select" id="interview-type">
-                <option value="technical">技术面试</option>
-                <option value="behavioral">行为面试</option>
-                <option value="comprehensive">综合面试</option>
-              </select>
-            </div>
-            <div class="setting-item">
-              <label class="form-label">难度等级</label>
-              <select v-model="difficulty" class="select" id="interview-difficulty">
-                <option value="easy">初级</option>
-                <option value="medium">中级</option>
-                <option value="hard">高级</option>
-              </select>
-            </div>
-          </div>
-          <button
-            class="btn btn-primary btn-lg btn-block"
-            @click="startInterview"
-            :disabled="!canStartInterview"
-            id="start-interview-btn"
-          >
-            🎯 开始模拟面试
-          </button>
         </div>
 
         <!-- 历史面试 -->
@@ -123,7 +127,11 @@
             :class="{ 'is-ai': msg.role === 'ai', 'is-user': msg.role === 'user' }"
           >
             <div class="msg-avatar">
-              {{ msg.role === 'ai' ? '🤖' : '👤' }}
+              <template v-if="msg.role === 'ai'">🤖</template>
+              <template v-else>
+                <AppAvatar v-if="authStore.user?.avatar_url" :src="authStore.user.avatar_url" :alt="authStore.user.full_name" size="sm" shape="circle" />
+                <span v-else>👤</span>
+              </template>
             </div>
             <div class="msg-bubble">
               <div class="msg-role">{{ msg.role === 'ai' ? 'AI 面试官' : '我' }}</div>
@@ -218,15 +226,41 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
 import { createInterview, fetchInterviews, fetchUserResume, updateInterview } from '@/lib/database'
-import { invokeEdgeFunction } from '@/lib/supabase'
 import { useAuthStore } from '@/stores/auth'
 import { useJobStore } from '@/stores/jobs'
 import { useToast } from '@/composables/useToast'
+import AppAvatar from '@/components/AppAvatar.vue'
 import type { Interview, InterviewMessage } from '@/types'
 
 const authStore = useAuthStore()
 const jobStore = useJobStore()
 const toast = useToast()
+
+type InterviewType = 'technical' | 'behavioral' | 'comprehensive'
+type InterviewDifficulty = 'easy' | 'medium' | 'hard'
+
+interface InterviewFeedback {
+  score: number
+  communication: number
+  technical: number
+  experience: number
+  overall: string
+  strengths: string[]
+  improvements: string[]
+}
+
+interface InterviewAIResponse {
+  message?: string
+  status?: 'active' | 'completed'
+  feedback?: Partial<InterviewFeedback>
+}
+
+interface LLMMessage {
+  role: 'system' | 'user' | 'assistant'
+  content: string
+}
+
+import { INTERVIEW_API_KEY, INTERVIEW_API_BASE_URL, INTERVIEW_MODEL } from '@/lib/interviewConfig'
 
 const availableJobs = computed(() => jobStore.jobs)
 const pastInterviews = ref<Interview[]>([])
@@ -234,11 +268,12 @@ const jobSelectMode = ref<'existing' | 'custom'>('existing')
 const selectedJobId = ref('')
 const customJobTitle = ref('')
 const customJobDescription = ref('')
-const interviewType = ref('technical')
-const difficulty = ref('medium')
+const interviewType = ref<InterviewType>('technical')
+const difficulty = ref<InterviewDifficulty>('medium')
 const interviewStarted = ref(false)
 const interviewEnded = ref(false)
 const aiTyping = ref(false)
+const isEndingInterview = ref(false)
 const userInput = ref('')
 const chatArea = ref<HTMLElement>()
 const chatMessages = ref<InterviewMessage[]>([])
@@ -254,15 +289,226 @@ const canStartInterview = computed(() => {
   }
 })
 
-const feedback = ref({
+const feedback = ref<InterviewFeedback>({
   score: 0,
   communication: 0,
   technical: 0,
   experience: 0,
   overall: '',
-  strengths: [] as string[],
-  improvements: [] as string[],
+  strengths: [],
+  improvements: [],
 })
+
+function clampScore(value: unknown) {
+  const score = Number(value)
+  if (Number.isNaN(score)) return 0
+  return Math.max(0, Math.min(100, Math.round(score)))
+}
+
+function normalizeFeedback(data?: Partial<InterviewFeedback> | Record<string, any>): InterviewFeedback {
+  return {
+    score: clampScore(data?.score),
+    communication: clampScore(data?.communication),
+    technical: clampScore(data?.technical),
+    experience: clampScore(data?.experience),
+    overall: typeof data?.overall === 'string' ? data.overall : '',
+    strengths: Array.isArray(data?.strengths) ? data.strengths.filter(Boolean).map(String) : [],
+    improvements: Array.isArray(data?.improvements) ? data.improvements.filter(Boolean).map(String) : [],
+  }
+}
+
+function ensureDeepSeekConfig() {
+  if (!INTERVIEW_API_KEY) {
+    throw new Error('未配置面试 API Key（VITE_INTERVIEW_API_KEY 或 VITE_CHATANYWHERE_API_KEY）')
+  }
+}
+
+function toText(value: unknown) {
+  if (typeof value === 'string') return value.trim()
+  return ''
+}
+
+function parseJSONSafe(text: string) {
+  try {
+    return JSON.parse(text)
+  } catch (_error) {
+    return null
+  }
+}
+
+function getDifficultyLabel(level: InterviewDifficulty) {
+  if (level === 'easy') return '初级'
+  if (level === 'hard') return '高级'
+  return '中级'
+}
+
+function getTypeLabel(type: InterviewType) {
+  if (type === 'behavioral') return '行为面试'
+  if (type === 'comprehensive') return '综合面试'
+  return '技术面试'
+}
+
+function summarizeResume(resume: Record<string, any> | null) {
+  if (!resume) return '未提供'
+  try {
+    return JSON.stringify(
+      {
+        name: toText(resume?.basic_info?.name) || '未填写',
+        selfEvaluation: toText(resume?.self_evaluation) || '未填写',
+        skills: Array.isArray(resume?.skills) ? resume.skills.slice(0, 12) : [],
+        experienceCount: Array.isArray(resume?.experience) ? resume.experience.length : 0,
+        projectCount: Array.isArray(resume?.projects) ? resume.projects.length : 0,
+        educationCount: Array.isArray(resume?.education) ? resume.education.length : 0,
+      },
+      null,
+      2,
+    )
+  } catch (_error) {
+    return '简历摘要解析失败'
+  }
+}
+
+function buildTranscript(messages: InterviewMessage[]) {
+  if (!messages.length) return '暂无历史对话'
+  return messages
+    .map(message => `${message.role === 'ai' ? '面试官' : '候选人'}: ${message.content}`)
+    .join('\n')
+}
+
+function getTurnStats(messages: InterviewMessage[]) {
+  const userTurns = messages.filter(message => message.role === 'user').length
+  const aiTurns = messages.filter(message => message.role === 'ai').length
+  return { userTurns, aiTurns }
+}
+
+async function callDeepSeek(messages: LLMMessage[], options: { temperature?: number; json?: boolean } = {}) {
+  ensureDeepSeekConfig()
+
+  const body: Record<string, unknown> = {
+    model: INTERVIEW_MODEL,
+    messages,
+    temperature: options.temperature ?? 0.7,
+  }
+
+  if (options.json) {
+    body.response_format = { type: 'json_object' }
+  }
+
+  const response = await fetch(`${INTERVIEW_API_BASE_URL.replace(/\/$/, '')}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${INTERVIEW_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  })
+
+  const payload = await response.json()
+  if (!response.ok) {
+    throw new Error(payload?.error?.message || `面试 API 请求失败(${response.status})`)
+  }
+
+  const content = payload?.choices?.[0]?.message?.content
+  if (typeof content !== 'string' || !content.trim()) {
+    throw new Error('面试 API 未返回有效内容')
+  }
+
+  return content.trim()
+}
+
+async function callDeepSeekStream(
+  messages: LLMMessage[],
+  options: { temperature?: number; onChunk?: (fullText: string) => void; onFirstChunk?: () => void } = {},
+) {
+  ensureDeepSeekConfig()
+
+  const response = await fetch(`${INTERVIEW_API_BASE_URL.replace(/\/$/, '')}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${INTERVIEW_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: INTERVIEW_MODEL,
+      messages,
+      temperature: options.temperature ?? 0.7,
+      stream: true,
+    }),
+  })
+
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null)
+    throw new Error(payload?.error?.message || `面试 API 请求失败(${response.status})`)
+  }
+
+  if (!response.body) {
+    throw new Error('面试 API 未返回流式响应')
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let fullText = ''
+  let gotFirstChunk = false
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() || ''
+
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed.startsWith('data:')) continue
+
+      const data = trimmed.slice(5).trim()
+      if (!data || data === '[DONE]') continue
+
+      const parsed = parseJSONSafe(data)
+      const delta = toText(parsed?.choices?.[0]?.delta?.content)
+      if (!delta) continue
+
+      if (!gotFirstChunk) {
+        gotFirstChunk = true
+        options.onFirstChunk?.()
+      }
+
+      fullText += delta
+      options.onChunk?.(fullText)
+    }
+  }
+
+  if (!fullText.trim()) {
+    throw new Error('面试 API 未返回有效流式内容')
+  }
+
+  return fullText.trim()
+}
+
+function resolveInterviewContext() {
+  if (jobSelectMode.value === 'existing') {
+    const job = availableJobs.value.find(item => item.id === selectedJobId.value)
+    if (!job) return null
+    return {
+      jobId: job.id,
+      jobTitle: job.title,
+      jobDescription: job.description || '',
+      fullTitle: `${job.title} - ${job.company?.name || ''}`.trim(),
+    }
+  }
+
+  const jobTitle = customJobTitle.value.trim()
+  if (!jobTitle) return null
+
+  return {
+    jobId: null,
+    jobTitle,
+    jobDescription: customJobDescription.value.trim(),
+    fullTitle: jobTitle,
+  }
+}
 
 async function loadData() {
   if (!authStore.user) return
@@ -278,53 +524,68 @@ async function loadData() {
 async function startInterview() {
   if (!authStore.user) return
 
-  let jobTitle: string
-  let jobDescription: string
-  let fullTitle: string
-
-  if (jobSelectMode.value === 'existing') {
-    const job = availableJobs.value.find(item => item.id === selectedJobId.value)
-    if (!job) return
-    jobTitle = job.title
-    jobDescription = job.description
-    fullTitle = `${job.title} - ${job.company?.name || ''}`
-  } else {
-    jobTitle = customJobTitle.value.trim()
-    jobDescription = customJobDescription.value.trim()
-    fullTitle = customJobTitle.value.trim()
-  }
+  const context = resolveInterviewContext()
+  if (!context) return
 
   try {
     const resume = await fetchUserResume(authStore.user.id)
     const interview = await createInterview({
       userId: authStore.user.id,
-      jobId: jobSelectMode.value === 'existing' ? selectedJobId.value : null,
-      jobTitle: fullTitle,
-    })
-    const result = await invokeEdgeFunction<{ message: string }>('interviewAI', {
-      action: 'start',
-      jobTitle,
-      jobDescription,
-      interviewType: interviewType.value,
-      difficulty: difficulty.value,
-      resume,
+      jobId: context.jobId,
+      jobTitle: context.fullTitle,
     })
 
     currentInterviewId.value = interview.id
     interviewStarted.value = true
     interviewEnded.value = false
-    currentJobTitle.value = fullTitle
-    currentJobDescription.value = jobDescription
-    chatMessages.value = [{ role: 'ai', content: result.message }]
+    currentJobTitle.value = context.fullTitle
+    currentJobDescription.value = context.jobDescription
+    chatMessages.value = []
+
+    const systemPrompt = `你是一位资深中文面试官，正在进行 ${getTypeLabel(interviewType.value)}。
+职位：${context.jobTitle}
+职位描述：${context.jobDescription || '未提供'}
+难度：${getDifficultyLabel(difficulty.value)}
+候选人简历摘要：
+${summarizeResume(resume)}
+
+面试规则：
+1. 面试采用“欢迎开场 + 单个问题”格式，一次只问一个问题。
+2. 问题要贴合职位、难度和候选人背景，避免空泛模板题。
+3. 保持专业、友善、鼓励，问题简洁清晰。
+4. 总轮次目标 5-8 轮（候选人回答轮次）。
+5. 第一轮必须从自我介绍切入。`
+
+    const aiMessageIndex = chatMessages.value.length
+    chatMessages.value.push({ role: 'ai', content: '' })
+    aiTyping.value = false
+
+    const firstQuestion = await callDeepSeekStream([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: '请输出开场白并提出第一个问题。' },
+    ], {
+      temperature: 0.7,
+      onChunk: (fullText) => {
+        chatMessages.value[aiMessageIndex].content = fullText
+        scrollToBottom()
+      },
+    })
+
+    if (!firstQuestion) throw new Error('AI 未返回开场问题')
+    chatMessages.value[aiMessageIndex].content = firstQuestion
+
     await updateInterview(interview.id, { messages: chatMessages.value })
     scrollToBottom()
   } catch (error: any) {
+    interviewStarted.value = false
     toast.error(`开始面试失败：${error?.message || '请稍后重试'}`)
+  } finally {
+    aiTyping.value = false
   }
 }
 
 async function sendAnswer() {
-  if (!userInput.value.trim() || aiTyping.value || !currentInterviewId.value) return
+  if (!userInput.value.trim() || aiTyping.value || !currentInterviewId.value || interviewEnded.value) return
 
   const userMessage = { role: 'user' as const, content: userInput.value.trim() }
   chatMessages.value.push(userMessage)
@@ -333,33 +594,59 @@ async function sendAnswer() {
 
   try {
     aiTyping.value = true
-    await updateInterview(currentInterviewId.value, { messages: chatMessages.value })
+    const turnStats = getTurnStats(chatMessages.value)
+    const maxTurns = difficulty.value === 'hard' ? 8 : 6
+    const shouldPrepareToEnd = turnStats.userTurns >= maxTurns
 
-    let jobTitle: string
-    let jobDescription: string
-    if (jobSelectMode.value === 'existing') {
-      const job = availableJobs.value.find(item => item.id === selectedJobId.value)
-      jobTitle = job?.title || currentJobTitle.value
-      jobDescription = job?.description || currentJobDescription.value
-    } else {
-      jobTitle = customJobTitle.value.trim()
-      jobDescription = customJobDescription.value.trim()
-    }
+    const systemPrompt = `你是一位资深中文面试官，正在进行 ${getTypeLabel(interviewType.value)}。
+职位：${currentJobTitle.value || customJobTitle.value.trim()}
+职位描述：${currentJobDescription.value || customJobDescription.value.trim() || '未提供'}
+难度：${getDifficultyLabel(difficulty.value)}
 
-    const resume = authStore.user ? await fetchUserResume(authStore.user.id) : null
-    const result = await invokeEdgeFunction<{ message: string }>('interviewAI', {
-      action: 'continue',
-      jobTitle,
-      jobDescription,
-      messages: chatMessages.value,
-      resume,
-      interviewType: interviewType.value,
-      difficulty: difficulty.value,
+规则：
+1. 一次只提一个问题；如表现优秀可以提高深度，如薄弱需追问细节。
+2. 优先避免连续重复同一类型问题。
+3. 当候选人回答轮次达到 5-8 轮时，可自然收尾。
+4. 若适合收尾，请输出结束面试的总结性话术，不再提新问题。
+5. 直接输出给候选人的回复正文，不要 JSON、不要代码块。`
+
+    const userPrompt = `当前轮次信息：
+- 候选人回答轮次：${turnStats.userTurns}
+- 面试官提问轮次：${turnStats.aiTurns}
+- 建议结束：${shouldPrepareToEnd ? '是' : '否'}
+
+对话记录：
+${buildTranscript(chatMessages.value)}`
+
+    const aiMessageIndex = chatMessages.value.length
+    chatMessages.value.push({ role: 'ai', content: '' })
+    aiTyping.value = false
+
+    const aiReply = await callDeepSeekStream([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ], {
+      temperature: 0.7,
+      onChunk: (fullText) => {
+        chatMessages.value[aiMessageIndex].content = fullText
+        scrollToBottom()
+      },
     })
 
-    chatMessages.value.push({ role: 'ai', content: result.message })
+    const shouldEnd = shouldPrepareToEnd
+
+    if (!aiReply) {
+      throw new Error('AI 未返回下一轮问题')
+    }
+    chatMessages.value[aiMessageIndex].content = aiReply
+
     await updateInterview(currentInterviewId.value, { messages: chatMessages.value })
     scrollToBottom()
+
+    if (shouldEnd) {
+      toast.info('本轮面试已结束，正在生成评估报告...')
+      await completeInterview(true)
+    }
   } catch (error: any) {
     toast.error(`继续面试失败：${error?.message || '请稍后重试'}`)
   } finally {
@@ -367,21 +654,49 @@ async function sendAnswer() {
   }
 }
 
-async function endInterview() {
-  if (!currentInterviewId.value || !authStore.user) return
+async function completeInterview(isAutoTriggered = false) {
+  if (!currentInterviewId.value || !authStore.user || isEndingInterview.value) return
+  if (!chatMessages.value.length) {
+    toast.error('暂无面试记录，无法生成报告')
+    return
+  }
 
   try {
-    const result = await invokeEdgeFunction<{ feedback: typeof feedback.value }>('interviewAI', {
-      action: 'end',
-      jobTitle: currentJobTitle.value,
-      messages: chatMessages.value,
-    })
+    isEndingInterview.value = true
 
-    feedback.value = {
-      ...result.feedback,
-      strengths: result.feedback.strengths || [],
-      improvements: result.feedback.improvements || [],
-    }
+    const systemPrompt = `你是一位专业的AI面试评估师。请根据以下面试对话内容，生成一份综合评估报告。
+
+评估维度：
+1. communication: 沟通表达能力(0-100)
+2. technical: 技术/专业能力(0-100)
+3. experience: 项目经验(0-100)
+4. score: 综合评分(0-100)
+
+请严格返回 JSON 格式评估报告，不要添加代码块标记。`
+
+    const userPrompt = `面试职位: ${currentJobTitle.value || customJobTitle.value.trim()}
+
+面试对话记录:
+${buildTranscript(chatMessages.value)}
+
+请生成评估报告，JSON格式:
+{
+  "score": 综合评分,
+  "communication": 沟通分,
+  "technical": 技术分,
+  "experience": 经验分,
+  "overall": "总体评价(200字左右)",
+  "strengths": ["亮点1", "亮点2"],
+  "improvements": ["改进建议1", "改进建议2"]
+}`
+
+    const raw = await callDeepSeek([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ], { temperature: 0.3, json: true })
+
+    const parsed = parseJSONSafe(raw) || {}
+    feedback.value = normalizeFeedback(parsed)
     interviewEnded.value = true
     await updateInterview(currentInterviewId.value, {
       messages: chatMessages.value,
@@ -392,7 +707,16 @@ async function endInterview() {
     pastInterviews.value = await fetchInterviews(authStore.user.id)
   } catch (error: any) {
     toast.error(`生成面试报告失败：${error?.message || '请稍后重试'}`)
+    if (isAutoTriggered) {
+      toast.info('可以点击“结束面试”按钮重试报告生成')
+    }
+  } finally {
+    isEndingInterview.value = false
   }
+}
+
+async function endInterview() {
+  await completeInterview(false)
 }
 
 function resetInterview() {
@@ -413,14 +737,15 @@ function viewHistory(interview: Interview) {
   currentInterviewId.value = interview.id
   currentJobTitle.value = interview.job_title
   chatMessages.value = interview.messages || []
+  const historyFeedback = interview.ai_feedback || {}
   feedback.value = {
-    score: interview.ai_score,
-    communication: interview.ai_feedback.communication || 0,
-    technical: interview.ai_feedback.technical || 0,
-    experience: interview.ai_feedback.experience || 0,
-    overall: interview.ai_feedback.overall || '',
-    strengths: interview.ai_feedback.strengths || [],
-    improvements: interview.ai_feedback.improvements || [],
+    score: clampScore(interview.ai_score),
+    communication: clampScore(historyFeedback.communication),
+    technical: clampScore(historyFeedback.technical),
+    experience: clampScore(historyFeedback.experience),
+    overall: typeof historyFeedback.overall === 'string' ? historyFeedback.overall : '',
+    strengths: Array.isArray(historyFeedback.strengths) ? historyFeedback.strengths.map(String) : [],
+    improvements: Array.isArray(historyFeedback.improvements) ? historyFeedback.improvements.map(String) : [],
   }
 }
 
@@ -498,13 +823,34 @@ onMounted(() => {
 }
 
 /* 职位选择 */
+.start-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
 .select-card, .settings-card, .history-card {
   padding: 32px;
-  margin-bottom: 24px;
   background-color: var(--color-bg-panel);
   border-radius: var(--radius-xl);
   box-shadow: none;
   border: none;
+}
+
+.select-card {
+  margin-bottom: 0;
+}
+
+.settings-card {
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.settings-card .card-heading {
+  margin-bottom: 24px;
 }
 
 .job-select-mode {
@@ -531,11 +877,14 @@ onMounted(() => {
   accent-color: var(--color-primary);
 }
 
+.job-selection-content {
+  padding-top: 20px;
+}
+
 .custom-job-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding-top: 16px;
 }
 
 .empty-jobs {
@@ -550,11 +899,34 @@ onMounted(() => {
   font-size: 15px;
 }
 
+.job-select-container {
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 2px 4px 8px 2px;
+}
+
+.job-select-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.job-select-container::-webkit-scrollbar-track {
+  background: var(--color-bg-surface-300);
+  border-radius: 3px;
+}
+
+.job-select-container::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.job-select-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-tertiary);
+}
+
 .job-select-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
-  margin-bottom: 24px;
 }
 
 .job-select-btn {
@@ -567,7 +939,7 @@ onMounted(() => {
   transition: all 0.2s;
 }
 
-.job-select-btn:hover { background-color: rgba(0, 0, 0, 0, 0.02); }
+.job-select-btn:hover { background-color: rgba(0, 0, 0, 0.02); }
 .job-select-btn.selected {
   border-color: var(--color-primary);
   background: rgba(0, 113, 227, 0.05);
@@ -591,7 +963,7 @@ onMounted(() => {
 
 .settings-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 20px;
   margin-bottom: 32px;
 }
@@ -837,7 +1209,7 @@ onMounted(() => {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background-color: var(--color-bg-dark);
+  background-color: #26251e;
   color: white;
   display: flex;
   flex-direction: column;
@@ -960,6 +1332,8 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
+  .start-grid { grid-template-columns: 1fr; }
+  .select-card, .settings-card { margin-bottom: 24px; }
   .job-select-grid { grid-template-columns: 1fr; }
   .settings-grid { grid-template-columns: 1fr; }
   .feedback-score-row { flex-direction: column; gap: 24px; }
