@@ -4,7 +4,7 @@
       <!-- 链接导航区 -->
       <div class="footer-nav-grid">
         <div class="footer-brand-col">
-          <div class="footer-logo text-display mb-6">KirinGo</div>
+          <div class="footer-logo text-display mb-6">KirinGo 麒麟智聘</div>
           <p class="footer-brand-desc text-serif mb-8">
             NEXT-GEN AI RECRUITMENT PLATFORM.<br>
             致力于用 AI 重新定义招聘与求职的每一个瞬间。

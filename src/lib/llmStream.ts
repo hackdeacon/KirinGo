@@ -125,7 +125,7 @@ export async function callLLMStream(
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${provider.apiKey}`,
           'HTTP-Referer': window.location.origin,
-          'X-Title': 'KirinGo',
+          'X-Title': 'KirinGo 麒麟智聘',
         },
         body: JSON.stringify(body),
       })

@@ -99,7 +99,7 @@
                 {{ isEdit ? '保存更改' : '确认发布' }}
               </button>
               <p class="text-tiny text-tertiary mt-4 text-center">
-                发布即表示您同意 KirinGo 的<router-link to="/terms" class="link">职位发布规范</router-link>。
+                发布即表示您同意 麒麟智聘 的<router-link to="/terms" class="link">职位发布规范</router-link>。
               </p>
             </div>
 

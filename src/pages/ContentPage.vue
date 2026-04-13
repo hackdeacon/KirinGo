@@ -92,7 +92,7 @@ const pageData: Record<string, { title: string, category: string, updated: strin
     category: 'RESOURCES',
     updated: '2026-04-10',
     content: `
-      <p>欢迎来到 KirinGo 使用指南。本平台旨在通过 AI 技术简化您的招聘与求职流程。</p>
+      <p>欢迎来到 麒麟智聘 使用指南。本平台旨在通过 AI 技术简化您的招聘与求职流程。</p>
       <h3>1. 个人资料完善</h3>
       <p>首先，请在“个人中心”完善您的基础信息。AI 将根据这些信息为您进行精准匹配。</p>
       <h3>2. 简历诊断与优化</h3>
@@ -106,7 +106,7 @@ const pageData: Record<string, { title: string, category: string, updated: strin
     category: 'RESOURCES',
     updated: '2026-04-05',
     content: `
-      <p>KirinGo 为企业提供高效、精准的 AI 驱动招聘解决方案。</p>
+      <p>麒麟智聘 为企业提供高效、精准的 AI 驱动招聘解决方案。</p>
       <h3>AI 筛选</h3>
       <p>告别手动翻阅。我们的系统会自动对海量简历进行语义分析，并根据岗位需求给出匹配分值。</p>
       <h3>人才画像</h3>
@@ -118,7 +118,7 @@ const pageData: Record<string, { title: string, category: string, updated: strin
     category: 'RESOURCES',
     updated: '2026-04-12',
     content: `
-      <p>KirinGo 使用最先进的大语言模型（LLM）与自研的招聘领域垂直模型。</p>
+      <p>麒麟智聘 使用最先进的大语言模型（LLM）与自研的招聘领域垂直模型。</p>
       <h3>数据隐私</h3>
       <p>我们严格遵守数据安全规范，所有简历分析均在加密环境下进行，且不会用于基础模型的公开训练。</p>
       <h3>算法公平性</h3>
@@ -148,7 +148,7 @@ const pageData: Record<string, { title: string, category: string, updated: strin
     category: 'COMPANY',
     updated: '2026-01-01',
     content: `
-      <p>KirinGo 成立于 2025 年，总部位于科技前沿。我们致力于用人工智能重塑职业发展的每一个关键节点。</p>
+      <p>麒麟智聘 成立于 2025 年，总部位于科技前沿。我们致力于用人工智能重塑职业发展的每一个关键节点。</p>
       <p>我们的使命是消除信息不对称，让每一个人都能找到最能发挥其才华的舞台。</p>
     `
   },
@@ -173,7 +173,7 @@ const pageData: Record<string, { title: string, category: string, updated: strin
     updated: '2026-01-01',
     content: `
       <p>您的隐私对我们至关重要。本协议阐述了我们如何收集、使用和保护您的个人信息。</p>
-      <p>我们绝不会将您的个人数据出售给第三方。所有数据仅用于提供和优化 KirinGo 的服务。</p>
+      <p>我们绝不会将您的个人数据出售给第三方。所有数据仅用于提供和优化 麒麟智聘 的服务。</p>
     `
   },
   'terms': {
@@ -181,7 +181,7 @@ const pageData: Record<string, { title: string, category: string, updated: strin
     category: 'COMPANY',
     updated: '2026-01-01',
     content: `
-      <p>通过访问或使用 KirinGo，即表示您同意遵守本服务条款。</p>
+      <p>通过访问或使用 麒麟智聘，即表示您同意遵守本服务条款。</p>
       <p>您应对您的账户安全负责，并确保在平台上提供的信息真实有效。</p>
     `
   }

@@ -118,7 +118,7 @@
               </div>
               <div class="setting-row">
                 <div class="setting-info">
-                  <div class="setting-title">关于 KirinGo</div>
+                  <div class="setting-title">关于 麒麟智聘</div>
                   <div class="setting-desc">当前版本 v1.0.0 (Cursor Warm Minimalist)</div>
                 </div>
                 <InfoIcon class="icon-sm text-secondary" />

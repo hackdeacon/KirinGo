@@ -1,4 +1,4 @@
-# KirinGo - 麒麟招聘 🚀
+# KirinGo - 麒麟智聘 🚀
 ### AI 赋能的温润极简智能招聘平台
 
 [![Vercel Deployment](https://img.shields.io/badge/Deploy-Vercel-black?style=flat-square&logo=vercel)](https://vercel.com)
@@ -12,7 +12,7 @@
 
 ## 🌟 项目愿景
 
-**KirinGo** (麒麟招聘) 不仅仅是一个招聘工具，它是一个"懂你"的求职助手。通过 AI 深度介入求职的每一个环节（简历优化、智能匹配、模拟面试、即时沟通），旨在打破信息不对称，让优质人才与卓越企业高效连接。
+**KirinGo** (麒麟智聘) 不仅仅是一个招聘工具，它是一个"懂你"的求职助手。通过 AI 深度介入求职的每一个环节（简历优化、智能匹配、模拟面试、即时沟通），旨在打破信息不对称，让优质人才与卓越企业高效连接。
 
 我们推崇 **温润极简主义 (Warm Minimalist)** 设计哲学，让求职不再焦虑，而是一种愉悦的职场跃迁体验。
 
@@ -29,7 +29,7 @@
 ## 📸 项目预览
 
 <div align="center">
-  <img src="https://pic.hackstory.cn/hero/image.webp" alt="KirinGo 首页预览" width="800"/>
+  <img src="https://pic.hackstory.cn/hero/image.webp" alt="KirinGo 麒麟智聘 首页预览" width="800"/>
   <p><em>温润极简的首页设计，双角色入口</em></p>
 </div>
 

@@ -23,7 +23,7 @@ supabase functions deploy
 
 ## Project Overview
 
-**KirinGo** - AI-powered intelligent recruitment platform built with Vue 3 + Supabase. Full-stack web application connecting job seekers with recruiters, featuring AI resume optimization, AI mock interviews, resume-job matching, and real-time chat.
+**KirinGo (麒麟智聘)** - AI-powered intelligent recruitment platform built with Vue 3 + Supabase. Full-stack web application connecting job seekers with recruiters, featuring AI resume optimization, AI mock interviews, resume-job matching, and real-time chat.
 
 ## Architecture
 
