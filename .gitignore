@@ -18,7 +18,16 @@ dist-ssr
 .vite
 
 # Supabase
+supabase/.temp
 supabase/functions/*/node_modules
+supabase/.env
+supabase/config.toml.local
+supabase/seed/local.sql
+# Supabase CLI local development
+supabase/.branches
+supabase/pg_dump
+supabase/logs
+
 
 # Logs
 logs
