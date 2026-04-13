@@ -18,7 +18,6 @@ dist-ssr
 .vite
 
 # Supabase
-supabase/.temp
 supabase/functions/*/node_modules
 
 # Logs
