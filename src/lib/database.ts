@@ -864,6 +864,11 @@ export async function fetchCandidateResumes(page = 1, pageSize = 20, filters?: {
       *,
       user:profiles!resumes_user_id_fkey(*)
     `, { count: 'exact' })
+    // Only show default resume (each candidate has one default resume)
+    .eq('is_default', true)
+
+  // Only show candidates whose user role is jobseeker (recruiters should not appear in candidate search)
+  query = query.eq('user.role', 'jobseeker')
 
   // Apply sorting
   const sortField = filters?.sortBy || 'ai_score'
