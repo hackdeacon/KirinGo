@@ -233,6 +233,12 @@ async function startOptimize() {
 项目经历：${JSON.stringify(resume.value.projects)}
 技能：${resume.value.skills?.join(', ')}
 
+重要规则：
+- 对于工作经历和项目经历，你只优化描述部分（description 字段）
+- 请不要修改时间（start/end）、公司名称、职位名称、项目名称、角色名称
+- original 字段只放描述部分的原文，不要包含时间、公司、职位
+- 优化只针对描述内容，让它更加量化、突出成果和影响力
+
 请以以下 JSON 格式返回：
 {
   "score": 简历评分(0-100),
@@ -240,7 +246,7 @@ async function startOptimize() {
   "suggestions": [
     {
       "category": "分类(自我评价/工作经历/项目经历/技能描述)",
-      "original": "原文",
+      "original": "原文(描述部分)",
       "optimized": "优化后的文本",
       "reason": "优化原因"
     }
@@ -284,20 +290,40 @@ function applySuggestion(index: number) {
       resume.value.self_evaluation = sug.optimized
       break
     case '工作经历':
-      // 匹配第一个相同原文的工作经历进行更新
+      // 模糊匹配找到对应工作经历进行更新
       if (resume.value.experience) {
-        const exp = resume.value.experience.find(e => e.description === sug.original)
+        // First try exact match
+        let exp = resume.value.experience.find(e => e.description === sug.original)
+        if (!exp) {
+          // If no exact match, try fuzzy match - description contains original text
+          const originalClean = sug.original.trim().toLowerCase()
+          exp = resume.value.experience.find(e =>
+            e.description?.trim().toLowerCase().includes(originalClean)
+          )
+        }
         if (exp) {
           exp.description = sug.optimized
+        } else {
+          toast.warn(`未找到匹配的工作经历，请手动复制：\n${sug.optimized}`)
         }
       }
       break
     case '项目经历':
-      // 匹配第一个相同原文的项目经历进行更新
+      // 模糊匹配找到对应项目经历进行更新
       if (resume.value.projects) {
-        const proj = resume.value.projects.find(p => p.description === sug.original)
+        // First try exact match
+        let proj = resume.value.projects.find(p => p.description === sug.original)
+        if (!proj) {
+          // If no exact match, try fuzzy match - description contains original text
+          const originalClean = sug.original.trim().toLowerCase()
+          proj = resume.value.projects.find(p =>
+            p.description?.trim().toLowerCase().includes(originalClean)
+          )
+        }
         if (proj) {
           proj.description = sug.optimized
+        } else {
+          toast.warn(`未找到匹配的项目经历，请手动复制：\n${sug.optimized}`)
         }
       }
       break
