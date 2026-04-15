@@ -128,6 +128,9 @@
             </div>
           </div>
 
+          <!-- 底部占位，防止最后一个卡片被固定栏挡住 -->
+          <div class="bottom-spacer"></div>
+
           <!-- 底部操作栏 -->
           <div class="sticky-action-bar">
             <div class="container-cursor flex-center-x gap-4">
@@ -647,6 +650,11 @@ onMounted(() => {
 }
 
 .sug-reason { flex: 1; }
+
+/* 底部占位，防止最后一个卡片被固定栏挡住 */
+.bottom-spacer {
+  height: 120px;
+}
 
 /* 底部栏 */
 .sticky-action-bar {
