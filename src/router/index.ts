@@ -63,6 +63,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/resume/view/:userId',
+      name: 'ResumeView',
+      component: () => import('@/pages/resume/ResumePage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/resume/ai-optimize',
       name: 'AIOptimize',
       component: () => import('@/pages/resume/AIOptimizePage.vue'),

@@ -131,6 +131,9 @@ ALTER TABLE public.resumes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "用户可管理自己的简历" ON public.resumes
   FOR ALL USING (auth.uid() = user_id);
 
+CREATE POLICY "所有人可查看所有简历" ON public.resumes
+  FOR SELECT USING (true);
+
 -- ============================================
 -- 5. 职位申请/投递表 (applications)
 -- ============================================
@@ -157,16 +160,6 @@ CREATE TABLE public.applications (
 );
 
 ALTER TABLE public.applications ENABLE ROW LEVEL SECURITY;
-
--- 由于 resumes 表的某个策略引用了 applications 表，我们在这里定义该策略
-CREATE POLICY "招聘者可查看投递过来的简历" ON public.resumes
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM public.applications a
-      WHERE a.resume_id = resumes.id
-      AND a.recruiter_id = auth.uid()
-    )
-  );
 
 CREATE POLICY "求职者可查看自己的投递" ON public.applications
   FOR SELECT USING (auth.uid() = user_id);

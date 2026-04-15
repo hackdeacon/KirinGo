@@ -560,7 +560,11 @@ export async function ensureConversation(params: {
     .eq('jobseeker_id', params.jobseekerId)
     .eq('recruiter_id', params.recruiterId)
 
-  query = params.jobId ? query.eq('job_id', params.jobId) : query.is('job_id', null)
+  if (params.jobId) {
+    query = query.eq('job_id', params.jobId)
+  } else {
+    query = query.is('job_id', null)
+  }
 
   const { data: existing, error: existingError } = await query.maybeSingle()
 
@@ -593,6 +597,14 @@ export async function ensureConversation(params: {
       )
     `)
     .single()
+
+  // 如果因为唯一约束冲突插入失败（并发场景），再次查询获取已存在的会话
+  if (error && error.code === '23505') {
+    const { data: conflictData, error: conflictError } = await query.maybeSingle()
+    if (!conflictError && conflictData) {
+      return conflictData as Conversation
+    }
+  }
 
   if (error) {
     throw error
@@ -859,19 +871,25 @@ export async function fetchCandidateResumes(page = 1, pageSize = 20, filters?: {
   query = query.order(sortField, { ascending: sortDirection === 'asc' })
 
   if (filters?.city) {
-    query = query.contains('basic_info->city', filters.city)
+    query = query.filter('basic_info->>city', 'ilike', `%${filters.city}%`)
   }
 
   if (filters?.minAiScore) {
     query = query.gte('ai_score', filters.minAiScore)
   }
 
-  if (filters?.skills && filters.skills.length > 0) {
-    // Use overlaps to match any of the skills
-    query = query.overlaps('skills', filters.skills)
+  // Get all matching results for the simple filters that work reliably
+  // Degree, major, and skills filtering will happen client-side for better fuzzy matching
+  // We fetch up to 1000 candidates which is enough for a recruitment platform
+  const { data: allData, error, count } = await query.range(0, 999)
+
+  if (error) {
+    throw error
   }
 
-  // Filter by minimum degree - check if any education entry meets the degree level
+  let candidates = (allData ?? []) as (Resume & { user: Profile })[]
+
+  // Client-side filtering for minimum degree - this is simple and reliable
   const degreeOrder: Record<string, number> = {
     '大专': 1,
     '本科': 2,
@@ -879,49 +897,52 @@ export async function fetchCandidateResumes(page = 1, pageSize = 20, filters?: {
     '博士': 4,
   }
   if (filters?.minDegree && degreeOrder[filters.minDegree]) {
-    // Check for the degree in any education entry through the first three entries (most recent first)
-    let orCondition = ''
-    for (let i = 0; i <= 2; i++) {
-      if (i > 0) orCondition += ','
-      orCondition += `education->${i}->degree.ilike.%${filters.minDegree}%`
-    }
-    // Also include higher degrees to satisfy "X and above" semantics
-    const minDegreeValue = degreeOrder[filters.minDegree!]
-    const degreesToInclude = Object.keys(degreeOrder).filter(d => degreeOrder[d] >= minDegreeValue)
-    for (const d of degreesToInclude) {
-      if (d !== filters.minDegree) {
-        for (let i = 0; i <= 2; i++) {
-          orCondition += `,education->${i}->degree.ilike.%${d}%`
-        }
-      }
-    }
-    query = query.or(orCondition)
+    const minDegreeValue = degreeOrder[filters.minDegree]
+    candidates = candidates.filter(resume => {
+      if (!resume.education || resume.education.length === 0) return false
+      // Check if any education entry meets or exceeds the minimum degree requirement
+      return resume.education.some(edu => {
+        const degreeValue = degreeOrder[edu.degree] ?? 0
+        return degreeValue >= minDegreeValue
+      })
+    })
   }
 
-  // Filter by major keywords - any education entry major contains the keyword
+  // Client-side filtering for major keywords (fuzzy search)
   if (filters?.majors && filters.majors.length > 0) {
-    for (const major of filters.majors) {
-      let majorCondition = ''
-      for (let i = 0; i <= 2; i++) {
-        if (i > 0) majorCondition += ','
-        majorCondition += `education->${i}->major.ilike.%${major}%`
-      }
-      query = query.or(majorCondition)
-    }
+    candidates = candidates.filter(resume => {
+      if (!resume.education || resume.education.length === 0) return false
+      // Check if any education major contains any of the search keywords (case-insensitive)
+      return resume.education.some(edu =>
+        filters.majors!.some(keyword =>
+          edu.major.toLowerCase().includes(keyword.toLowerCase())
+        )
+      )
+    })
   }
 
+  // Client-side filtering for skills (fuzzy search)
+  if (filters?.skills && filters.skills.length > 0) {
+    candidates = candidates.filter(resume => {
+      if (!resume.skills || resume.skills.length === 0) return false
+      // Check if any skill contains any of the search keywords (case-insensitive)
+      return resume.skills.some(skill =>
+        filters.skills!.some(keyword =>
+          skill.toLowerCase().includes(keyword.toLowerCase())
+        )
+      )
+    })
+  }
+
+  // After filtering, do pagination manually
+  const total = candidates.length
   const from = (page - 1) * pageSize
-  const to = from + pageSize - 1
-
-  const { data, error, count } = await query.range(from, to)
-
-  if (error) {
-    throw error
-  }
+  const to = from + pageSize
+  const paginatedCandidates = candidates.slice(from, to)
 
   return {
-    resumes: (data ?? []) as (Resume & { user: Profile })[],
-    total: count ?? 0,
+    resumes: paginatedCandidates,
+    total: total,
     page,
     pageSize,
   }

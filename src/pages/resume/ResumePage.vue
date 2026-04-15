@@ -2,8 +2,8 @@
   <div class="resume-page">
     <div class="container-cursor">
       <div class="page-header">
-        <h1 class="text-heading">我的简历</h1>
-        <div class="header-actions">
+        <h1 class="text-heading">{{ isViewMode ? '候选人简历' : '我的简历' }}</h1>
+        <div class="header-actions" v-if="!isViewMode">
           <router-link to="/resume/ai-optimize" class="btn btn-orange" id="ai-optimize-btn">
             <ZapIcon class="icon-sm" /> AI 优化简历
           </router-link>
@@ -15,14 +15,26 @@
         <span class="text-mono">正在加载简历数据...</span>
       </div>
 
-      <div class="resume-layout">
+      <div v-if="error" class="error-state card">
+        <p class="text-error">{{ error }}</p>
+        <router-link to="/recruiter/candidates" class="btn btn-primary mt-4">
+          返回搜索
+        </router-link>
+      </div>
+
+      <div v-if="!loading && !error" class="resume-layout">
         <div class="resume-main">
           <!-- 简历预览 -->
           <div class="resume-preview card animate-fade-in-up">
             <!-- 基本信息 -->
             <div class="resume-section no-border">
               <div class="resume-header-info">
-                <AppAvatar class="resume-avatar" :src="authStore.user?.avatar_url" :alt="resume.basic_info.name || '简历头像'" size="xl" />
+                <AppAvatar
+                  class="resume-avatar"
+                  :src="isViewMode ? targetUserProfile?.avatar_url : authStore.user?.avatar_url"
+                  :alt="resume.basic_info.name || '简历头像'"
+                  size="xl"
+                />
                 <div class="resume-basic">
                   <h2 class="text-subheading">{{ resume.basic_info.name || '未填写姓名' }}</h2>
                   <div class="resume-meta-row text-mono">
@@ -132,8 +144,8 @@
             </div>
           </div>
 
-          <!-- 简历编辑器 -->
-          <div class="resume-editor card animate-fade-in-up" style="animation-delay: 0.1s">
+          <!-- 简历编辑器 - 仅在编辑模式显示 -->
+          <div v-if="!isViewMode" class="resume-editor card animate-fade-in-up" style="animation-delay: 0.1s">
             <div class="editor-header">
               <div>
                 <h3 class="text-subheading">编辑详细资料</h3>
@@ -439,14 +451,16 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import {
   createDefaultResume,
   fetchUserResume,
+  fetchProfileById,
   saveResume,
 } from '@/lib/database'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
-import type { Resume, ResumeEducation, ResumeExperience, ResumeProject } from '@/types'
+import type { Resume, ResumeEducation, ResumeExperience, ResumeProject, Profile } from '@/types'
 import AppAvatar from '@/components/AppAvatar.vue'
 import {
   Zap as ZapIcon,
@@ -466,8 +480,17 @@ import {
   Globe as GlobeIcon,
 } from 'lucide-vue-next'
 
+const route = useRoute()
 const authStore = useAuthStore()
 const toast = useToast()
+
+// 是否是查看他人简历模式
+const isViewMode = computed(() => !!route.params.userId)
+const targetUserId = computed(() => route.params.userId as string)
+
+// 查看模式下：目标用户的头像信息
+const targetUserProfile = ref<Profile | null>(null)
+
 const resume = ref<Resume>({
   id: '',
   user_id: '',
@@ -499,6 +522,7 @@ const resume = ref<Resume>({
 })
 const loading = ref(false)
 const saving = ref(false)
+const error = ref<string | null>(null)
 const skillsInput = ref('')
 const certificatesInput = ref('')
 const aiScore = computed(() => resume.value.ai_score || 0)
@@ -590,11 +614,23 @@ function calculateAge() {
 }
 
 async function ensureResumeLoaded() {
-  if (!authStore.user) return
+  const userId = isViewMode.value ? targetUserId.value : authStore.user?.id
+
+  if (!userId) {
+    error.value = '无法访问：未提供用户ID'
+    loading.value = false
+    return
+  }
 
   loading.value = true
+  error.value = null
   try {
-    const existing = await fetchUserResume(authStore.user.id)
+    // In view mode, also fetch profile for avatar
+    if (isViewMode.value) {
+      targetUserProfile.value = await fetchProfileById(userId)
+    }
+
+    const existing = await fetchUserResume(userId)
     if (existing) {
       // Ensure new fields exist on older resumes
       if (!existing.basic_info.github) existing.basic_info.github = ''
@@ -602,23 +638,31 @@ async function ensureResumeLoaded() {
       if (!existing.basic_info.birthday) existing.basic_info.birthday = ''
 
       resume.value = existing
-      // Add current flag for items that end with "至今"
-      ;(resume.value.experience as ExperienceWithCurrent[]).forEach(exp => {
-        exp.current = exp.end === '至今'
-      })
-      ;(resume.value.education as EducationWithCurrent[]).forEach(edu => {
-        edu.current = edu.end === '至今'
-      })
-      ;(resume.value.projects as ProjectWithCurrent[]).forEach(proj => {
-        proj.current = proj.end === '至今'
-      })
-      originalResume.value = JSON.stringify(resume.value)
+
+      // Only add current flag and track original when in edit mode
+      if (!isViewMode.value) {
+        ;(resume.value.experience as ExperienceWithCurrent[]).forEach(exp => {
+          exp.current = exp.end === '至今'
+        })
+        ;(resume.value.education as EducationWithCurrent[]).forEach(edu => {
+          edu.current = edu.end === '至今'
+        })
+        ;(resume.value.projects as ProjectWithCurrent[]).forEach(proj => {
+          proj.current = proj.end === '至今'
+        })
+        originalResume.value = JSON.stringify(resume.value)
+      }
     } else {
-      resume.value = await createDefaultResume(authStore.user)
-      originalResume.value = JSON.stringify(resume.value)
+      if (isViewMode.value) {
+        error.value = '该候选人还没有创建简历'
+      } else {
+        resume.value = await createDefaultResume(authStore.user!)
+        originalResume.value = JSON.stringify(resume.value)
+      }
     }
-  } catch (error: any) {
-    toast.error(`加载简历失败：${error?.message || '请稍后重试'}`)
+  } catch (err: any) {
+    error.value = `加载简历失败：${err?.message || '请稍后重试'}`
+    toast.error(error.value)
   } finally {
     loading.value = false
   }
@@ -725,6 +769,16 @@ onMounted(() => {
 
 .loading-state {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
+  background: var(--color-bg-surface-200);
+}
+
+.error-state {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 16px;
@@ -1113,6 +1167,8 @@ onMounted(() => {
 .text-success { color: var(--color-success); }
 .text-tertiary { color: var(--color-text-tertiary); }
 .text-danger { color: var(--color-error); }
+.icon-xs { width: 14px; height: 14px; flex-shrink: 0; }
+.icon-sm { width: 16px; height: 16px; flex-shrink: 0; }
 
 @media (max-width: 1024px) {
   .resume-layout {
