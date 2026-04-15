@@ -307,7 +307,7 @@ function applySuggestion(index: number) {
         if (exp) {
           exp.description = sug.optimized
         } else {
-          toast.warn(`未找到匹配的工作经历，请手动复制：\n${sug.optimized}`)
+          toast.warning(`未找到匹配的工作经历，请手动复制：\n${sug.optimized}`)
         }
       }
       break
@@ -327,7 +327,7 @@ function applySuggestion(index: number) {
         if (proj) {
           proj.description = sug.optimized
         } else {
-          toast.warn(`未找到匹配的项目经历，请手动复制：\n${sug.optimized}`)
+          toast.warning(`未找到匹配的项目经历，请手动复制：\n${sug.optimized}`)
         }
       }
       break
@@ -338,7 +338,7 @@ function applySuggestion(index: number) {
       break
     default:
       // Unknown category, let user copy manually
-      toast.warn(`未知分类 "${sug.category}"，请手动复制优化内容：\n${sug.optimized}`)
+      toast.warning(`未知分类 "${sug.category}"，请手动复制优化内容：\n${sug.optimized}`)
       break
   }
 

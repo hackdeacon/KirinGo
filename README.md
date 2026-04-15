@@ -41,8 +41,8 @@
 
 | AI 功能 | 详细描述 | 入口位置 | 技术实现 | 部署位置 |
 |---------|----------|----------|----------|----------|
-| **AI 简历优化** | 根据目标职位要求，智能扫描简历，提供**结构完整性、技能匹配度、关键词覆盖率、语言表达**四个维度打分，并给出具体改进建议，直接在网页中润色改写简历内容 | 求职者 → 我的简历 → 编辑简历 → AI 优化 | Edge Function (`optimizeResume`) + GPT-4 函数调用 | Supabase Edge Functions |
-| **AI 模拟面试** | 针对目标职位，AI 面试官会逐步提出专业问题，支持**实时流式文字输出**，面试结束后从**技术能力、项目经验、表达能力、简历匹配**四个维度给出评估报告和改进方向 | 求职者 → AI 模拟面试 | 前端直连 + Server-Sent Events 流式输出，自定义 buffer 处理 | 前端直连 DeepSeek/ChatAnywhere/OpenAI |
+| **AI 简历优化** | 根据目标职位要求，智能扫描简历，提供**结构完整性、技能匹配度、关键词覆盖率、语言表达**四个维度打分，并给出每条优化建议作为独立卡片，支持**一键采纳**单个建议，直接在网页中润色改写简历内容 | 求职者 → 我的简历 → 编辑简历 → AI 优化 | Edge Function (`optimizeResume`) + GPT-4 函数调用 | Supabase Edge Functions |
+| **AI 模拟面试** | 针对目标职位，AI 面试官会逐步提出专业问题，支持**实时流式文字输出**，支持 Markdown 格式渲染，面试结束后从**技术能力、项目经验、表达能力、简历匹配**四个维度给出评估报告和改进方向 | 求职者 → AI 模拟面试 | 前端直连 + Server-Sent Events 流式输出，自定义 buffer 处理 | 前端直连 DeepSeek/ChatAnywhere/OpenAI |
 | **AI 简历解析** | 上传 PDF 简历后，AI 自动提取**个人信息、教育经历、工作经验、项目经历、技能证书**，结构化存入数据库，支持用户二次编辑 | 求职者 → 新建简历 → 上传 PDF | Edge Function (`parseResume`) + GPT-4 JSON 模式 | Supabase Edge Functions |
 | **AI 职位解析** | 招聘者输入职位描述后，AI 自动提取职位要求、工作职责、技能标签，生成职位嵌入向量用于语义搜索 | 招聘者 → 发布职位 → AI 解析 | Edge Function (`parseJob`) + GPT-4 + OpenAI Embedding | Supabase Edge Functions |
 | **AI 职位匹配** | 基于简历生成语义嵌入向量，通过 pgvector 进行**余弦相似度搜索**，找到与求职者最匹配的开放职位，并给出 AI 匹配分析报告 | 求职者 → 职位匹配 | PostgreSQL pgvector + 余弦相似度 + Edge Function (`matchResumeJob`) | 数据库 + Supabase Edge Functions |
@@ -81,14 +81,18 @@ Edge Function matchResumeJob → AI 对每个匹配结果进行深度分析 → 
   - 支持关键词全文搜索（PostgreSQL 原生全文搜索）
   - 无限滚动加载，使用 IntersectionObserver 实现
 
-- **AI 智能匹配**
-  - 基于简历语义向量，一键推荐最匹配的职位
-  - 展示匹配度分数（0-100）和详细分析（优势/不足/建议）
-  - 直接一键投递推荐职位，跳转到投递确认
+- **AI 职位匹配分析**
+  - 当你查看任意职位详情时，如果已设置默认简历，会自动进行 AI 匹配分析
+  - 基于简历语义向量和职位向量计算余弦相似度，从技能、经验、学历、地点四个维度评估
+  - 展示整体匹配度分数（0-100）和详细分析（优势/不足/建议）
+  - 评估完成后可直接一键投递
 
 - **AI 模拟面试**
-  - 可选择任意公开职位开始全真模拟面试
+  - 可选择任意公开职位开始全真模拟面试，也支持自定义输入职位名称和描述
+  - 支持技术面试/行为面试/综合面试三种类型
+  - 支持初级/中级/高级三种难度等级
   - AI 流式提问，逐字显示，接近真实对话体验
+  - AI 回复支持 Markdown 格式渲染，代码等内容展示更美观
   - 用户实时回答，AI 继续追问，最多 10 轮对话
   - 面试结束生成完整四维度评估报告
   - 历史面试记录自动保存，可随时回顾对话和评估
@@ -110,6 +114,9 @@ Edge Function matchResumeJob → AI 对每个匹配结果进行深度分析 → 
   - 显示已读/未读状态，已读消息对勾变绿
   - 会话列表显示未读消息计数
   - 进入聊天后自动清空对应用户的未读计数
+  - 支持搜索会话名称/职位关键词
+  - 支持筛选只看未读会话
+  - 支持删除不需要的会话记录
   - 左下角 AI 按钮，一键生成回复建议
 
 - **个人资料**
@@ -120,8 +127,8 @@ Edge Function matchResumeJob → AI 对每个匹配结果进行深度分析 → 
 ### 👔 招聘者端功能
 
 - **企业管理**
-  - 创建完善企业信息
-  - 上传企业 Logo
+  - 直接创建并完善企业信息
+  - 支持拖拽上传企业 Logo，也可点击选择上传
   - 填写行业、规模、融资阶段、城市、详细地址、企业介绍、官网
 
 - **职位管理**
@@ -130,12 +137,9 @@ Edge Function matchResumeJob → AI 对每个匹配结果进行深度分析 → 
   - 编辑/关闭/重新开放职位
   - 职位卡片显示浏览量统计
 
-- **求职者匹配**
-  - 基于职位需求，AI 自动推荐匹配度最高的求职者简历
-  - 按匹配度从高到低排序，优先查看最合适的候选人
-
 - **牛人搜索**
   - 招聘者可主动在简历库中搜索发掘优秀人才
+  - 仅展示每个求职者的**默认简历**，避免重复展示同一人多份简历
   - 支持多维度组合筛选：
     - 工作城市模糊搜索
     - 最低学历要求（大专/本科/硕士/博士及以上）
@@ -143,6 +147,7 @@ Edge Function matchResumeJob → AI 对每个匹配结果进行深度分析 → 
     - 专业关键词模糊搜索
     - 最低 AI 评分筛选
   - 支持按 AI 评分降序或最新发布排序
+  - 客户端模糊搜索，解决复杂筛选条件语法解析问题
   - 分页展示，点击直接查看完整简历或发起聊天
 
 - **申请管理**
@@ -156,6 +161,9 @@ Edge Function matchResumeJob → AI 对每个匹配结果进行深度分析 → 
   - 与求职者实时双向沟通
   - 基于申请自动创建对话，无需手动发起
   - 已读状态 + 未读计数
+  - 支持搜索会话名称/职位关键词
+  - 支持筛选只看未读会话
+  - 支持删除不需要的会话记录
   - AI 辅助回复，帮助 HR 快速回复
 
 ---
@@ -179,6 +187,7 @@ Edge Function matchResumeJob → AI 对每个匹配结果进行深度分析 → 
 | **悬停交互** | 所有可点击文字/卡片，悬停时文字颜色渐变到品牌色 `#f54e00`，这是项目标志性交互语言 |
 | **过渡** | 所有过渡使用 `0.2s ease-out`，快但不突兀 |
 | **字体** | 系统无衬线栈：`ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial` |
+| **主题切换** | 支持自动/浅色/深色三种模式，记住用户偏好，系统颜色变化自动同步 |
 
 ---
 
@@ -186,31 +195,30 @@ Edge Function matchResumeJob → AI 对每个匹配结果进行深度分析 → 
 
 | 路径 | 页面 | 角色 | 说明 |
 |------|------|------|------|
-| `/` | Home | 所有人 | 首页，介绍项目 |
-| `/login` | Login | 未登录 | 登录注册页 |
-| `/jobseeker/dashboard` | Dashboard | 求职者 | 求职者控制台首页 |
-| `/jobseeker/resumes` | ResumeList | 求职者 | 简历列表 |
-| `/jobseeker/resumes/:id/edit` | ResumeEdit | 求职者 | 简历编辑 |
-| `/jobseeker/jobs` | JobList | 求职者 | 职位列表 |
-| `/jobseeker/jobs/:id` | JobDetail | 求职者 | 职位详情 |
-| `/jobseeker/matches` | MatchList | 求职者 | AI 推荐匹配职位 |
-| `/jobseeker/interviews` | InterviewList | 求职者 | 模拟面试历史 |
-| `/jobseeker/interviews/:id` | InterviewRoom | 求职者 | 面试房间 |
-| `/jobseeker/applications` | Applications | 求职者 | 我的投递 |
-| `/jobseeker/profile` | Profile | 求职者 | 个人资料 |
-| `/recruiter/dashboard` | Dashboard | 招聘者 | 招聘者控制台首页 |
-| `/recruiter/company` | CompanyEdit | 招聘者 | 企业信息编辑 |
-| `/recruiter/jobs` | JobList | 招聘者 | 我的职位列表 |
-| `/recruiter/jobs/new` | JobEdit | 招聘者 | 发布新职位 |
-| `/recruiter/jobs/:id/edit` | JobEdit | 招聘者 | 编辑职位 |
-| `/recruiter/applications` | Applications | 招聘者 | 申请列表 |
-| `/recruiter/applications/:id` | ApplicationDetail | 招聘者 | 申请详情 |
-| `/recruiter/profile` | Profile | 招聘者 | 招聘者资料 |
-| `/chat/:id` | ChatRoom | 已登录 | 聊天室 |
+| `/` | HomePage | 所有人 | 首页，根据当前角色动态展示搜索框 |
+| `/auth/login` | LoginPage | 未登录 | 登录 |
+| `/auth/register` | RegisterPage | 未登录 | 注册 |
+| `/auth/forgot-password` | ForgotPasswordPage | 未登录 | 忘记密码 |
+| `/auth/reset-password` | ResetPasswordPage | 未登录 | 重置密码 |
+| `/jobs` | JobListPage | 所有人 | 公开职位列表 |
+| `/jobs/:id` | JobDetailPage | 所有人 | 职位详情，求职者可查看 AI 匹配分析 |
+| `/resume` | ResumePage | 求职者 | 我的简历（列表 + 编辑） |
+| `/resume/view/:userId` | ResumePage | 已登录 | 查看指定求职者简历 |
+| `/resume/ai-optimize` | AIOptimizePage | 求职者 | AI 简历优化 |
+| `/interview` | InterviewPage | 求职者 | AI 模拟面试（含历史记录列表 + 面试房间） |
+| `/applications` | ApplicationsPage | 已登录 | 投递记录（求职者看自己投出，招聘者看收到） |
+| `/profile` | ProfilePage | 已登录 | 个人资料编辑 |
+| `/chat` | ChatRoomPage | 已登录 | 聊天会话列表 |
+| `/chat/:id` | ChatRoomPage | 已登录 | 聊天室 |
+| `/recruiter/candidates` | CandidateSearchPage | 招聘者 | 牛人搜索 |
+| `/recruiter/jobs` | JobManagementPage | 招聘者 | 职位管理 |
+| `/recruiter/jobs/post` | PostJobPage | 招聘者 | 发布新职位 |
+| `/recruiter/jobs/edit/:id` | PostJobPage | 招聘者 | 编辑职位 |
+| `/recruiter/company/settings` | CompanySettingsPage | 招聘者 | 企业信息设置 |
 
 所有路由采用**动态导入**实现代码分割：
 ```typescript
-const Home = () => import('../pages/Home.vue')
+const Home = () => import('../pages/HomePage.vue')
 ```
 
 ---
@@ -221,50 +229,48 @@ const Home = () => import('../pages/Home.vue')
 KirinGo/
 ├── src/
 │   ├── components/               # 可复用 Vue 组件 (PascalCase 命名)
-│   │   ├── AppHeader.vue         # 顶部导航栏，包含面包屑、用户菜单
-│   │   ├── AppSidebar.vue        # 侧边栏导航，移动端转为抽屉弹窗
-│   │   ├── AuthGuard.vue         # 路由认证守卫包装器，未登录跳登录
-│   │   ├── AvatarUpload.vue      # 头像上传组件，支持裁剪预览
+│   │   ├── AppHeader.vue         # 顶部导航栏，包含用户菜单、主题切换
+│   │   ├── AppAvatar.vue         # 用户头像组件
 │   │   ├── Badge.vue             # 标签徽章基础组件
 │   │   ├── Button.vue            # 基础按钮组件，支持 variant/size/disabled
 │   │   ├── Card.vue              # 基础卡片容器，统一内边距阴影
 │   │   ├── ChatMessage.vue       # 聊天消息单元，区分自己/对方样式
+│   │   ├── chat/ChatSidebar.vue  # 聊天侧边栏，会话列表、搜索筛选、删除
 │   │   ├── Input.vue             # 基础输入框组件，统一样式
 │   │   ├── JobCard.vue           # 职位卡片，显示职位基本信息
 │   │   ├── Modal.vue             # 弹窗模态框，支持点击遮罩关闭
 │   │   ├── Pagination.vue        # 分页组件，支持上一页下一页
-│   │   ├── RoleSwitch.vue        # 角色切换组件，下拉选择
 │   │   ├── Select.vue            # 下拉选择组件，支持选项搜索
 │   │   ├── StatusTag.vue         # 状态标签组件，根据状态自动变色
 │   │   └── TextArea.vue          # 多行文本输入组件
 │   │
 │   ├── pages/                    # 页面组件，按路由组织
-│   │   ├── Home.vue              # 首页
-│   │   ├── Login.vue             # 登录/注册页，邮箱验证码登录
-│   │   ├── jobseeker/            # 求职者端页面
-│   │   │   ├── Dashboard.vue     # 求职者首页，统计卡片展示
-│   │   │   ├── ResumeList.vue    # 简历列表，新建/编辑/删除
-│   │   │   ├── ResumeEdit.vue    # 简历编辑，分步表单
-│   │   │   ├── JobList.vue       # 职位列表，筛选+搜索+无限滚动
-│   │   │   ├── JobDetail.vue     # 职位详情，投递按钮
-│   │   │   ├── MatchList.vue     # AI 推荐匹配列表
-│   │   │   ├── InterviewList.vue # 模拟面试历史列表
-│   │   │   ├── InterviewRoom.vue # 面试房间，流式对话
-│   │   │   ├── Applications.vue  # 我的投递列表
-│   │   │   └── Profile.vue       # 个人资料编辑
+│   │   ├── HomePage.vue          # 首页，动态搜索根据当前角色展示不同提示
+│   │   ├── ApplicationsPage.vue   # 投递列表（求职者投出/招聘者收到）
+│   │   ├── ContentPage.vue       # 静态内容页（关于/招聘信息/隐私条款等）
+│   │   ├── ProfilePage.vue       # 个人资料编辑
+│   │   ├── auth/                 # 认证相关页面
+│   │   │   ├── LoginPage.vue     # 登录
+│   │   │   ├── RegisterPage.vue  # 注册
+│   │   │   ├── ForgotPasswordPage.vue # 忘记密码
+│   │   │   └── ResetPasswordPage.vue  # 重置密码
+│   │   ├── chat/
+│   │   │   └── ChatRoomPage.vue  # 聊天室（含会话列表），实时消息
+│   │   ├── interview/
+│   │   │   └── InterviewPage.vue # AI 模拟面试（含历史记录 + 面试房间）
+│   │   ├── jobs/
+│   │   │   ├── JobListPage.vue   # 职位列表，筛选+搜索+无限滚动
+│   │   │   └── JobDetailPage.vue  # 职位详情，AI 匹配分析，投递按钮
 │   │   ├── recruiter/            # 招聘者端页面
-│   │   │   ├── Dashboard.vue     # 招聘者首页，统计数据
-│   │   │   ├── CompanyEdit.vue   # 企业信息编辑
-│   │   │   ├── JobList.vue       # 我的职位列表
-│   │   │   ├── JobEdit.vue       # 发布/编辑职位
-│   │   │   ├── Applications.vue  # 申请列表
-│   │   │   ├── ApplicationDetail.vue # 申请详情，查看简历
-│   │   │   └── Profile.vue       # 招聘者资料
-│   │   └── chat/
-│   │       └── ChatRoom.vue      # 聊天室，实时消息
+│   │   │   ├── CandidateSearchPage.vue # 牛人搜索，多维度筛选
+│   │   │   ├── CompanySettingsPage.vue # 企业信息设置，支持拖拽上传 Logo
+│   │   │   ├── JobManagementPage.vue  # 职位管理列表
+│   │   │   └── PostJobPage.vue     # 发布/编辑职位
+│   │   └── resume/
+│   │       ├── AIOptimizePage.vue # AI 简历优化，独立建议卡片支持一键采纳
+│   │       └── ResumePage.vue     # 简历管理（列表/编辑/查看）
 │   │
 │   ├── composables/               # Composition API 工具函数
-│   │   ├── useDarkMode.ts        # 暗黑模式（预留接口）
 │   │   ├── useDebounce.ts        # 防抖工具，参数 delay ms
 │   │   ├── useIntersectionObserver.ts # 无限滚动观察器封装
 │   │   ├── useLoading.ts         # 加载状态管理，boolean 包装
@@ -275,13 +281,15 @@ KirinGo/
 │   │
 │   ├── stores/                   # Pinia 状态存储 (Setup 风格)
 │   │   ├── auth.ts               # 认证状态，用户信息，登录登出方法
-│   │   ├── chat.ts               # 聊天未读计数状态管理
-│   │   └── role.ts               # 当前角色状态，求职者/招聘者持久化
+│   │   ├── chat.ts               # 聊天会话管理，未读计数，删除会话
+│   │   ├── role.ts               # 当前角色状态，求职者/招聘者持久化
+│   │   └── theme.ts              # 主题状态管理，支持自动/浅色/深色模式
 │   │
 │   ├── lib/                      # 库和抽象层
 │   │   ├── database.ts           # 数据库操作封装，所有查询放这里
-│   │   ├── supabase.ts           # Supabase 客户端初始化，类型导出
-│   │   └── llmStream.ts          # LLM 流式响应处理，自定义 buffer 拼接，用于模拟面试
+│   │   ├── interviewConfig.ts    # 面试 LLM 配置多提供者自动降级
+│   │   ├── llmStream.ts          # LLM 流式响应处理，自定义 buffer 拼接
+│   │   └── supabase.ts           # Supabase 客户端初始化，类型导出
 │   │
 │   ├── router/
 │   │   └── index.ts              # Vue Router 路由配置，动态导入
@@ -296,7 +304,7 @@ KirinGo/
 │   └── main.ts                   # 应用入口，初始化 Pinia/Router
 │
 ├── supabase/
-│   ├── .temp/                    # Supabase CLI 本地缓存（不提交 Git）
+│   ├── .temp/                    # Supabase CLI 本地缓存（允许提交）
 │   ├── functions/                # Supabase Edge Functions (Deno Runtime)
 │   │   ├── optimizeResume/
 │   │   │   └── index.ts          # AI 简历优化打分，输入简历+职位，输出评分建议
