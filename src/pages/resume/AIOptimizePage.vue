@@ -290,6 +290,7 @@ function applySuggestion(index: number) {
       resume.value.self_evaluation = sug.optimized
       break
     case '工作经历':
+    case '工作经验':
       // 模糊匹配找到对应工作经历进行更新
       if (resume.value.experience) {
         // First try exact match
@@ -309,6 +310,7 @@ function applySuggestion(index: number) {
       }
       break
     case '项目经历':
+    case '项目经验':
       // 模糊匹配找到对应项目经历进行更新
       if (resume.value.projects) {
         // First try exact match
@@ -328,8 +330,13 @@ function applySuggestion(index: number) {
       }
       break
     case '技能描述':
+    case '技能':
       // 技能整体替换
       resume.value.skills = sug.optimized.split(/[,\n]/).map(s => s.trim()).filter(Boolean)
+      break
+    default:
+      // Unknown category, let user copy manually
+      toast.warn(`未知分类 "${sug.category}"，请手动复制优化内容：\n${sug.optimized}`)
       break
   }
 
@@ -649,7 +656,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   padding: 24px 0 calc(24px + env(safe-area-inset-bottom));
-  background: rgba(242, 241, 237, 0.8);
+  background: color-mix(in oklab, var(--color-bg-canvas) 80%, transparent);
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--color-border);
   z-index: 200;
