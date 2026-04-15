@@ -41,6 +41,7 @@ const router = createRouter({
       path: '/',
       name: 'Home',
       component: () => import('@/pages/HomePage.vue'),
+      meta: { keepAlive: true },
     },
 
     // 职位
@@ -48,6 +49,7 @@ const router = createRouter({
       path: '/jobs',
       name: 'Jobs',
       component: () => import('@/pages/jobs/JobListPage.vue'),
+      meta: { keepAlive: true },
     },
     {
       path: '/jobs/:id',
@@ -60,7 +62,7 @@ const router = createRouter({
       path: '/resume',
       name: 'Resume',
       component: () => import('@/pages/resume/ResumePage.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, keepAlive: true },
     },
     {
       path: '/resume/view/:userId',
@@ -72,7 +74,7 @@ const router = createRouter({
       path: '/resume/ai-optimize',
       name: 'AIOptimize',
       component: () => import('@/pages/resume/AIOptimizePage.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, keepAlive: true },
     },
 
     // AI 模拟面试
@@ -80,7 +82,7 @@ const router = createRouter({
       path: '/interview',
       name: 'Interview',
       component: () => import('@/pages/interview/InterviewPage.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, keepAlive: true },
     },
 
     // 聊天
@@ -88,7 +90,7 @@ const router = createRouter({
       path: '/chat',
       name: 'ChatList',
       component: () => import('@/pages/chat/ChatRoomPage.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, keepAlive: true },
       beforeEnter: async (to, _from, next) => {
         const chatStore = useChatStore()
         const authStore = useAuthStore()
@@ -124,7 +126,7 @@ const router = createRouter({
       path: '/applications',
       name: 'Applications',
       component: () => import('@/pages/ApplicationsPage.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, keepAlive: true },
     },
 
     // 个人中心
@@ -132,7 +134,7 @@ const router = createRouter({
       path: '/profile',
       name: 'Profile',
       component: () => import('@/pages/ProfilePage.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, keepAlive: true },
     },
 
     // 招聘方管理
@@ -140,13 +142,13 @@ const router = createRouter({
       path: '/recruiter/jobs',
       name: 'JobManagement',
       component: () => import('@/pages/recruiter/JobManagementPage.vue'),
-      meta: { requiresAuth: true, role: 'recruiter' },
+      meta: { requiresAuth: true, role: 'recruiter', keepAlive: true },
     },
     {
       path: '/recruiter/candidates',
       name: 'CandidateSearch',
       component: () => import('@/pages/recruiter/CandidateSearchPage.vue'),
-      meta: { requiresAuth: true, role: 'recruiter' },
+      meta: { requiresAuth: true, role: 'recruiter', keepAlive: true },
     },
     {
       path: '/recruiter/jobs/post',
@@ -164,7 +166,7 @@ const router = createRouter({
       path: '/recruiter/company/settings',
       name: 'CompanySettings',
       component: () => import('@/pages/recruiter/CompanySettingsPage.vue'),
-      meta: { requiresAuth: true, role: 'recruiter' },
+      meta: { requiresAuth: true, role: 'recruiter', keepAlive: true },
     },
 
     // 静态内容页面

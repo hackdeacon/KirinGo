@@ -71,6 +71,18 @@ export async function ensureProfile(authUser: AuthUserLike) {
 
   const existing = await fetchProfileById(authUser.id)
   if (existing) {
+    // If user is jobseeker but has no resume yet, create default resume
+    if (existing.role === 'jobseeker') {
+      const { data: existingResumes } = await supabase
+        .from('resumes')
+        .select('id')
+        .eq('user_id', existing.id)
+        .eq('is_default', true)
+        .limit(1)
+      if (!existingResumes || existingResumes.length === 0) {
+        await createDefaultResume(existing)
+      }
+    }
     return existing
   }
 
@@ -92,7 +104,19 @@ export async function ensureProfile(authUser: AuthUserLike) {
     throw error
   }
 
-  return data as Profile
+  const newProfile = data as Profile
+
+  // Automatically create a default resume for jobseekers upon registration
+  if (newProfile.role === 'jobseeker') {
+    try {
+      await createDefaultResume(newProfile)
+    } catch (e) {
+      console.error('Failed to create default resume for new jobseeker:', e)
+      // Don't fail the whole registration if resume creation fails
+    }
+  }
+
+  return newProfile
 }
 
 export async function fetchJobs() {
@@ -175,7 +199,10 @@ export async function updateJob(id: string, updates: Partial<Job>) {
 
   const { data, error } = await supabase
     .from('jobs')
-    .update(updates)
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString()
+    })
     .eq('id', id)
     .select('*')
     .single()
@@ -200,6 +227,61 @@ export async function deleteJob(id: string) {
   }
 }
 
+// 统计职位收到的投递数量
+export async function countJobApplications(jobId: string): Promise<number> {
+  ensureConfigured()
+
+  const { count, error } = await supabase
+    .from('applications')
+    .select('*', { count: 'exact', head: true })
+    .eq('job_id', jobId)
+
+  if (error) {
+    throw error
+  }
+
+  return count ?? 0
+}
+
+// 批量统计多个职位的投递数量
+export async function countJobApplicationsBulk(jobIds: string[]): Promise<Map<string, number>> {
+  ensureConfigured()
+
+  if (jobIds.length === 0) {
+    return new Map()
+  }
+
+  const { data, error } = await supabase
+    .from('applications')
+    .select('job_id')
+    .in('job_id', jobIds)
+
+  if (error) {
+    throw error
+  }
+
+  const counts = new Map<string, number>()
+  data.forEach(app => {
+    counts.set(app.job_id, (counts.get(app.job_id) ?? 0) + 1)
+  })
+
+  return counts
+}
+
+// 更新职位状态
+export async function updateJobStatus(id: string, status: Job['status']): Promise<void> {
+  ensureConfigured()
+
+  const { error } = await supabase
+    .from('jobs')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', id)
+
+  if (error) {
+    throw error
+  }
+}
+
 export async function fetchCompanyByRecruiter(recruiterId: string) {
   ensureConfigured()
 
@@ -207,13 +289,14 @@ export async function fetchCompanyByRecruiter(recruiterId: string) {
     .from('companies')
     .select('*')
     .eq('recruiter_id', recruiterId)
-    .maybeSingle()
+    .order('created_at', { ascending: false })
+    .limit(1)
 
-  if (error && !isNotFoundError(error)) {
+  if (error) {
     throw error
   }
 
-  return (data as Company | null) ?? null
+  return (data?.[0] as Company | undefined) ?? null
 }
 
 export async function updateCompany(id: string, updates: Partial<Company>) {
@@ -221,7 +304,10 @@ export async function updateCompany(id: string, updates: Partial<Company>) {
 
   const { data, error } = await supabase
     .from('companies')
-    .update(updates)
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString()
+    })
     .eq('id', id)
     .select('*')
     .single()
@@ -705,6 +791,29 @@ export async function sendConversationMessage(params: {
   return data as Message
 }
 
+export async function deleteConversation(conversationId: string) {
+  ensureConfigured()
+
+  // 先删除所有消息，再删除会话（依赖数据库级联删除也可以，但手动删除更稳妥）
+  const { error: messagesError } = await supabase
+    .from('messages')
+    .delete()
+    .eq('conversation_id', conversationId)
+
+  if (messagesError) {
+    throw messagesError
+  }
+
+  const { error } = await supabase
+    .from('conversations')
+    .delete()
+    .eq('id', conversationId)
+
+  if (error) {
+    throw error
+  }
+}
+
 export async function fetchInterviews(userId: string) {
   ensureConfigured()
 
@@ -847,6 +956,8 @@ export async function fetchProfileStats(userId: string, role: UserRole): Promise
 }
 
 // 获取候选人简历列表（供 HR 搜索牛人）
+// 原则：每个求职者注册后必有一份默认简历（由注册逻辑和数据库触发器保证）
+// 所以直接查询所有默认简历，关联用户信息即可，不需要复杂的 fallback 逻辑
 export async function fetchCandidateResumes(page = 1, pageSize = 20, filters?: {
   city?: string
   minDegree?: string
@@ -858,35 +969,16 @@ export async function fetchCandidateResumes(page = 1, pageSize = 20, filters?: {
 }) {
   ensureConfigured()
 
-  let query = supabase
+  // Query all default resumes with user profile joined
+  // RLS policy "所有人可查看所有简历" allows SELECT for everyone
+  const { data: allData, error, count } = await supabase
     .from('resumes')
     .select(`
       *,
       user:profiles!resumes_user_id_fkey(*)
     `, { count: 'exact' })
-    // Only show default resume (each candidate has one default resume)
     .eq('is_default', true)
-
-  // Only show candidates whose user role is jobseeker (recruiters should not appear in candidate search)
-  query = query.eq('user.role', 'jobseeker')
-
-  // Apply sorting
-  const sortField = filters?.sortBy || 'ai_score'
-  const sortDirection = filters?.sortOrder || 'desc'
-  query = query.order(sortField, { ascending: sortDirection === 'asc' })
-
-  if (filters?.city) {
-    query = query.filter('basic_info->>city', 'ilike', `%${filters.city}%`)
-  }
-
-  if (filters?.minAiScore) {
-    query = query.gte('ai_score', filters.minAiScore)
-  }
-
-  // Get all matching results for the simple filters that work reliably
-  // Degree, major, and skills filtering will happen client-side for better fuzzy matching
-  // We fetch up to 1000 candidates which is enough for a recruitment platform
-  const { data: allData, error, count } = await query.range(0, 999)
+    .eq('user.role', 'jobseeker')
 
   if (error) {
     throw error
@@ -894,10 +986,32 @@ export async function fetchCandidateResumes(page = 1, pageSize = 20, filters?: {
 
   let candidates = (allData ?? []) as (Resume & { user: Profile })[]
 
-  // Remove candidates where user is null (this happens when foreign key filter doesn't match)
+  // Remove any accidental duplicates (keep one per user)
+  const seenUserIds = new Set<string>()
+  candidates = candidates.filter(resume => {
+    if (!resume.user || seenUserIds.has(resume.user_id)) return false
+    seenUserIds.add(resume.user_id)
+    return true
+  })
+
+  // Filter out null users (should not happen with proper data consistency)
   candidates = candidates.filter(resume => resume.user != null)
 
-  // Client-side filtering for minimum degree - this is simple and reliable
+  if (filters?.city && filters.city.trim()) {
+    const cityFilter = filters.city.toLowerCase()
+    candidates = candidates.filter(resume => {
+      const candidateCity = (resume.basic_info?.city || '').toLowerCase()
+      return candidateCity.includes(cityFilter)
+    })
+  }
+
+  if (filters?.minAiScore && filters.minAiScore > 0) {
+    candidates = candidates.filter(resume => {
+      return (resume.ai_score || 0) >= filters.minAiScore!
+    })
+  }
+
+  // Step 4: Client-side filtering for minimum degree - this is simple and reliable
   const degreeOrder: Record<string, number> = {
     '大专': 1,
     '本科': 2,
@@ -916,7 +1030,7 @@ export async function fetchCandidateResumes(page = 1, pageSize = 20, filters?: {
     })
   }
 
-  // Client-side filtering for major keywords (fuzzy search)
+  // Step 5: Client-side filtering for major keywords (fuzzy search)
   if (filters?.majors && filters.majors.length > 0) {
     candidates = candidates.filter(resume => {
       if (!resume.education || resume.education.length === 0) return false
@@ -929,7 +1043,7 @@ export async function fetchCandidateResumes(page = 1, pageSize = 20, filters?: {
     })
   }
 
-  // Client-side filtering for skills (fuzzy search)
+  // Step 6: Client-side filtering for skills (fuzzy search)
   if (filters?.skills && filters.skills.length > 0) {
     candidates = candidates.filter(resume => {
       if (!resume.skills || resume.skills.length === 0) return false
@@ -942,7 +1056,20 @@ export async function fetchCandidateResumes(page = 1, pageSize = 20, filters?: {
     })
   }
 
-  // After filtering, do pagination manually
+  // Step 7: Apply sorting
+  const sortField = filters?.sortBy || 'ai_score'
+  const sortDirection = filters?.sortOrder || 'desc'
+  candidates.sort((a, b) => {
+    const aVal = sortField === 'ai_score' ? (a.ai_score || 0) : (new Date(a.updated_at || a.created_at || '').getTime())
+    const bVal = sortField === 'ai_score' ? (b.ai_score || 0) : (new Date(b.updated_at || b.created_at || '').getTime())
+    if (sortDirection === 'desc') {
+      return bVal - aVal
+    } else {
+      return aVal - bVal
+    }
+  })
+
+  // Step 8: After filtering, do pagination manually
   const total = candidates.length
   const from = (page - 1) * pageSize
   const to = from + pageSize

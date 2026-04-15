@@ -24,9 +24,15 @@
 
       <AppHeader v-if="!isAuthPage" />
       <main :class="['main-content', { 'auth-main': isAuthPage }]">
-        <router-view v-slot="{ Component, route: viewRoute }">
+        <router-view v-slot="{ Component, route }">
           <transition name="page" mode="out-in">
-            <component :is="Component" :key="viewRoute.path" />
+            <div>
+              <!-- 只缓存配置了 keepAlive: true 的页面 -->
+              <keep-alive>
+                <component :is="Component" v-if="route.meta.keepAlive" :key="route.name" />
+              </keep-alive>
+              <component :is="Component" v-if="!route.meta.keepAlive" :key="route.path" />
+            </div>
           </transition>
         </router-view>
       </main>

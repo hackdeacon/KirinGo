@@ -10,9 +10,9 @@
             致力于用 AI 重新定义招聘与求职的每一个瞬间。
           </p>
           <div class="social-links">
-            <a href="#" class="social-icon-btn"><GithubIcon class="icon-sm" /></a>
-            <a href="#" class="social-icon-btn"><TwitterIcon class="icon-sm" /></a>
-            <a href="#" class="social-icon-btn"><LinkedinIcon class="icon-sm" /></a>
+            <a href="https://github.com/hackdeacon/KirinGo" target="_blank" rel="noopener noreferrer" class="social-icon-btn"><GithubIcon class="icon-sm" /></a>
+            <a href="https://twitter.com/hackdeacon" target="_blank" rel="noopener noreferrer" class="social-icon-btn"><TwitterIcon class="icon-sm" /></a>
+            <a href="https://hackdeacon.cn" target="_blank" rel="noopener noreferrer" class="social-icon-btn"><LinkedinIcon class="icon-sm" /></a>
           </div>
         </div>
 
@@ -86,46 +86,63 @@ const isRecruiter = computed(() => authStore.isRecruiter)
   border-top: 1px solid oklab(1 0 0 / 0.08);
 }
 
+@media (max-width: 768px) {
+  .app-footer {
+    padding: 64px 0 100px;
+  }
+}
+
 .footer-nav-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
   gap: 64px;
-  padding-bottom: 80px;
+  padding-bottom: 64px;
   border-bottom: 1px solid oklab(1 0 0 / 0.05);
 }
 
 .footer-brand-col {
-  max-width: 320px;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .footer-brand-desc {
   font-size: 15px;
   line-height: 1.6;
   color: oklab(1 0 0 / 0.4);
+  margin-bottom: 40px;
 }
 
 .social-links {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .social-icon-btn {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: oklab(1 0 0 / 0.04);
-  border: 1px solid oklab(1 0 0 / 0.08);
-  border-radius: 8px;
-  color: oklab(1 0 0 / 0.4);
-  transition: all 0.2s;
+  background: transparent;
+  border: 1px solid oklab(1 0 0 / 0.12);
+  border-radius: 12px;
+  color: oklab(1 0 0 / 0.5);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .social-icon-btn:hover {
-  background: oklab(1 0 0 / 0.08);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
   color: #ffffff;
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px oklab(0 0 0 / 0.25);
+}
+
+.social-icon-btn .icon-sm {
+  width: 18px;
+  height: 18px;
 }
 
 .footer-col-title {
@@ -201,13 +218,25 @@ const isRecruiter = computed(() => authStore.isRecruiter)
 }
 
 @media (max-width: 834px) {
-  .footer-nav-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
-  .footer-brand-col { grid-column: span 2; max-width: 100%; }
+  .footer-nav-grid { grid-template-columns: 1fr 1fr 1fr 1fr; gap: 32px; }
+  .footer-brand-col { grid-column: span 4; }
 }
 
-@media (max-width: 768px) {
-  .footer-nav-grid { grid-template-columns: 1fr; gap: 32px; }
-  .footer-brand-col { grid-column: span 1; }
-  .footer-bottom { flex-direction: column; gap: 16px; align-items: flex-start; }
+@media (max-width: 640px) {
+  .footer-nav-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .footer-brand-col { grid-column: span 3; }
+  .footer-brand-col { text-align: center; }
+  .social-links { justify-content: center; }
+  .footer-links-col { text-align: center; }
+  .footer-bottom { flex-direction: column; gap: 16px; align-items: center; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .footer-nav-grid { grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .footer-brand-col { grid-column: span 3; }
+  .footer-brand-col { text-align: center; }
+  .social-links { justify-content: center; }
+  .footer-links-col { text-align: center; }
+  .footer-bottom { flex-direction: column; gap: 16px; align-items: center; text-align: center; }
 }
 </style>

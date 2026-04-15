@@ -349,13 +349,15 @@ async function handleSave() {
   try {
     const recruiterId = authStore.user!.id
     if (companyId.value) {
+      // 更新已有公司信息
       await updateCompany(companyId.value, {
-        ...form,
-        recruiter_id: recruiterId,
+        ...form
       })
+      // 更新成功后重新加载数据确保同步
+      await loadCompanyData()
       toast.success('公司信息已更新')
     } else {
-      // Create new company if not exists
+      // 创建新公司
       const { data, error } = await supabase
         .from('companies')
         .insert({
@@ -370,6 +372,7 @@ async function handleSave() {
       toast.success('公司信息已创建')
     }
   } catch (error: any) {
+    console.error('保存公司信息失败:', error)
     toast.error('保存失败：' + error.message)
   } finally {
     saving.value = false

@@ -48,7 +48,7 @@
         </div>
 
         <div class="hero-ctas animate-fade-in-up" style="animation-delay: 0.4s">
-          <router-link to="/jobs" class="btn btn-primary btn-hero">
+          <router-link :to="authStore.isRecruiter ? '/recruiter/candidates' : '/jobs'" class="btn btn-primary btn-hero">
             {{ authStore.isRecruiter ? '寻找人才' : '探索机会' }}
           </router-link>
           <router-link v-if="!authStore.isAuthenticated" to="/auth/register" class="btn btn-ghost">立即加入</router-link>
@@ -162,7 +162,12 @@ const jobStore = useJobStore()
 const authStore = useAuthStore()
 
 const searchKeyword = ref('')
-const hotTags = ['前端开发', 'Java', 'AI 算法', '产品经理', 'Go 语言', '数据分析']
+const hotTags = computed(() => {
+  if (authStore.isRecruiter) {
+    return ['本科', '计算机', '人工智能', '前端开发', 'Java', '数据分析']
+  }
+  return ['前端开发', 'Java', 'AI 算法', '产品经理', 'Go 语言', '数据分析']
+})
 
 const loading = ref(true)
 
@@ -229,14 +234,22 @@ function getStatColor(index: number) {
 }
 
 function handleSearch() {
-  jobStore.setFilters({ keyword: searchKeyword.value })
-  router.push({ path: '/jobs', query: { keyword: searchKeyword.value } })
+  if (authStore.isRecruiter) {
+    router.push({ path: '/recruiter/candidates', query: { keyword: searchKeyword.value } })
+  } else {
+    jobStore.setFilters({ keyword: searchKeyword.value })
+    router.push({ path: '/jobs', query: { keyword: searchKeyword.value } })
+  }
 }
 
 function searchByTag(tag: string) {
   searchKeyword.value = tag
-  jobStore.setFilters({ keyword: tag })
-  router.push({ path: '/jobs', query: { keyword: tag } })
+  if (authStore.isRecruiter) {
+    router.push({ path: '/recruiter/candidates', query: { keyword: tag } })
+  } else {
+    jobStore.setFilters({ keyword: tag })
+    router.push({ path: '/jobs', query: { keyword: tag } })
+  }
 }
 
 onMounted(async () => {

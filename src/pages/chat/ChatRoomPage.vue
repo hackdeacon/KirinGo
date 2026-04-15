@@ -1,17 +1,22 @@
 <template>
   <div class="chat-room-page">
     <div class="chat-desktop-layout" v-if="chatStore.conversations.length > 0">
-      <!-- 左侧: 列表边栏 (1/3) -->
+      <!-- 移动端: 会话列表全屏展示 (只在 <= 1024px 显示) -->
+      <aside class="mobile-sidebar" :class="{ 'show': showConversationList }" v-if="conversation">
+        <ChatSidebar />
+      </aside>
+
+      <!-- 左侧: 列表边栏 (桌面端，只在 > 1024px 显示) -->
       <aside class="desktop-sidebar">
         <ChatSidebar />
       </aside>
 
       <!-- 中间: 聊天主窗口 (1/3) -->
-      <main class="chat-main-content" v-if="conversation">
+      <main class="chat-main-content" :class="{ 'mobile-show': !showConversationList }" v-if="conversation">
         <!-- 顶部导航栏 -->
         <header class="chat-header animate-fade-in">
           <div class="header-inner">
-            <button class="back-link-mobile" @click="$router.push('/chat')">
+            <button class="back-link-mobile" @click="handleGoBack">
               <ChevronLeftIcon class="icon-sm" />
             </button>
             <div class="chat-header-info">
@@ -79,7 +84,7 @@
               @keyup.enter="handleSend"
             />
             <button class="send-btn-v2" @click="handleSend" :disabled="!inputText.trim()">
-              <SendIcon class="icon-sm" />
+              <ArrowUpIcon class="icon-sm" />
             </button>
           </div>
         </footer>
@@ -172,6 +177,7 @@ import ChatSidebar from '@/components/chat/ChatSidebar.vue'
 import {
   ChevronLeft as ChevronLeftIcon,
   Send as SendIcon,
+  ArrowUp as ArrowUpIcon,
   MessageSquare as MessageSquareIcon
 } from 'lucide-vue-next'
 
@@ -185,6 +191,7 @@ const messagesArea = ref<HTMLElement>()
 let unsubscribe: (() => void) | null = null
 
 const conversationId = computed(() => route.params.id as string)
+const showConversationList = ref(!conversationId.value)
 const conversation = computed(() =>
   chatStore.conversations.find(c => c.id === conversationId.value)
 )
@@ -205,12 +212,22 @@ const otherAvatar = computed(() => {
   return conversation.value.recruiter?.avatar_url || ''
 })
 
-const quickReplies = [
-  '你好，方便聊一下吗？',
-  '请问还在招人吗？',
-  '期望薪资是多少？',
-  '什么时候方便面试？',
-]
+const quickReplies = computed(() => {
+  if (authStore.user?.role === 'recruiter') {
+    return [
+      '你好，请问对这个职位还感兴趣吗？',
+      '方便安排一下面试时间吗？',
+      '你期望的薪资是多少？',
+      '什么时候可以到岗？',
+    ]
+  }
+  return [
+    '你好，方便聊一下这个职位吗？',
+    '请问这个岗位还在招人吗？',
+    '这个岗位的薪资范围是多少？',
+    '什么时候方便安排面试？',
+  ]
+})
 
 async function handleSend() {
   if (!inputText.value.trim() || !conversationId.value) return
@@ -238,6 +255,14 @@ function formatMsgTime(dateStr: string): string {
   return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
 }
 
+function handleGoBack() {
+  if (window.innerWidth <= 1024) {
+    showConversationList.value = true
+  } else {
+    router.back()
+  }
+}
+
 onMounted(async () => {
   // 确保会话列表已加载
   if (chatStore.conversations.length === 0) {
@@ -247,7 +272,8 @@ onMounted(async () => {
   // 路由守卫已经处理了 /chat 到 /chat/:id 的重定向
   // 这里只需处理当前会话的消息加载
   if (conversationId.value) {
-    if (messages.value.length === 0) {
+    // 如果已经缓存了消息，直接显示不需要加载
+    if (!chatStore.messagesCache[conversationId.value] || chatStore.messagesCache[conversationId.value].length === 0) {
       loadingMessages.value = true
     }
     await chatStore.fetchMessages(conversationId.value)
@@ -264,8 +290,12 @@ watch(conversationId, async (newId) => {
     unsubscribe = null
   }
   if (newId) {
+    // 移动端：当有 conversationId 时，显示聊天窗口隐藏列表
+    if (window.innerWidth <= 1024) {
+      showConversationList.value = false
+    }
     // 只有在没有缓存时才显示加载状态
-    if (messages.value.length === 0) {
+    if (!chatStore.messagesCache[newId] || chatStore.messagesCache[newId].length === 0) {
       loadingMessages.value = true
     }
     
@@ -273,6 +303,11 @@ watch(conversationId, async (newId) => {
     loadingMessages.value = false
     scrollToBottom()
     unsubscribe = chatStore.subscribeToMessages(newId)
+  } else {
+    // 移动端：没有 id 时显示会话列表
+    if (window.innerWidth <= 1024) {
+      showConversationList.value = true
+    }
   }
 })
 
@@ -380,6 +415,25 @@ onUnmounted(() => {
   background-color: var(--color-bg-surface-300);
   border-radius: var(--radius-pill);
   color: var(--color-text-tertiary);
+}
+
+.back-link-mobile {
+  display: none;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-bg-surface-200);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-link-mobile:hover {
+  background: var(--color-bg-surface-300);
+  transform: translateX(-2px);
 }
 
 /* 消息列表 */
@@ -745,6 +799,11 @@ onUnmounted(() => {
   }
 }
 
+/* > 1024px: 桌面端，mobile-sidebar 隐藏，只显示 desktop-sidebar */
+.mobile-sidebar {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   .chat-room-page {
     padding: 0;
@@ -754,6 +813,7 @@ onUnmounted(() => {
     border-radius: 0;
     box-shadow: none;
     max-width: 100%;
+    position: relative;
   }
   .desktop-sidebar {
     display: none;
@@ -763,6 +823,30 @@ onUnmounted(() => {
   }
   .back-link-mobile {
     display: flex;
+  }
+  .mobile-sidebar {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background-color: var(--color-bg-canvas);
+    display: none;
+  }
+  .mobile-sidebar.show {
+    display: block;
+  }
+  .chat-main-content {
+    display: none;
+  }
+  .chat-main-content.mobile-show {
+    display: flex;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .chat-room-page {
+    height: calc(100vh - 80px);
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0));
   }
 }
 </style>

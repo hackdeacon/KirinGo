@@ -59,18 +59,23 @@ function isActive(path: string) {
 .tab-bar {
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
-  background: rgba(242, 241, 237, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--color-border);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(calc(100% - 32px), 420px);
+  height: 56px;
+  margin-bottom: calc(12px + env(safe-area-inset-bottom, 0));
+  background: color-mix(in oklab, var(--color-bg-surface-200) 70%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid color-mix(in oklab, var(--color-border) 60%, transparent);
+  border-radius: 9999px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   justify-content: space-around;
   padding: 0 8px;
-  padding-bottom: env(safe-area-inset-bottom, 0);
   z-index: 100;
 }
 
@@ -79,32 +84,50 @@ function isActive(path: string) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 8px 16px;
+  gap: 2px;
+  padding: 6px 12px;
+  border-radius: 9999px;
   text-decoration: none;
   color: var(--color-text-tertiary);
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tab-item.active {
   color: var(--color-text-primary);
+  background: color-mix(in oklab, var(--color-text-primary) 12%, transparent);
+  padding: 6px 32px;
+  box-shadow: 0 2px 8px color-mix(in oklab, var(--color-text-primary) 8%, transparent);
 }
 
 .tab-icon {
   width: 20px;
   height: 20px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab-item.active .tab-icon {
+  transform: translateY(-1px);
+  color: var(--color-text-primary);
 }
 
 .tab-label {
   font-family: var(--font-display);
   font-size: 11px;
-  font-weight: 400;
+  font-weight: 500;
+  opacity: 0.8;
+  transition: all 0.25s ease;
+}
+
+.tab-item.active .tab-label {
+  opacity: 1;
+  font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 .tab-badge {
   position: absolute;
-  top: 4px;
-  right: 12px;
+  top: 2px;
+  right: 8px;
   min-width: 14px;
   height: 14px;
   padding: 0 4px;
@@ -116,5 +139,16 @@ function isActive(path: string) {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (max-width: 360px) {
+  .tab-bar {
+    width: calc(100% - 24px);
+    height: 52px;
+    margin-bottom: calc(8px + env(safe-area-inset-bottom, 0));
+  }
+  .tab-item {
+    padding: 4px 8px;
+  }
 }
 </style>

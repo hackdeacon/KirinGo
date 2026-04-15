@@ -62,6 +62,13 @@
 
           <div class="item-indicators">
             <div class="unread-dot" v-if="getUnread(conv) > 0"></div>
+            <button
+              class="delete-btn"
+              @click="handleDeleteConversation($event, conv.id)"
+              :disabled="deletingId === conv.id"
+            >
+              <Trash2Icon class="delete-icon" />
+            </button>
           </div>
         </router-link>
       </div>
@@ -78,17 +85,21 @@
 import { ref, computed, onMounted } from 'vue'
 import { useChatStore } from '@/stores/chat'
 import { useAuthStore } from '@/stores/auth'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import type { Conversation } from '@/types'
 import AppAvatar from '@/components/AppAvatar.vue'
-import { Search as SearchIcon } from 'lucide-vue-next'
+import { Search as SearchIcon, Trash2 as Trash2Icon } from 'lucide-vue-next'
+import { useToast } from '@/composables/useToast'
 
 const chatStore = useChatStore()
 const authStore = useAuthStore()
 const route = useRoute()
+const router = useRouter()
+const { success, error } = useToast()
 
 const searchQuery = ref('')
 const filter = ref<'all' | 'unread'>('all')
+const deletingId = ref<string | null>(null)
 
 const activeId = computed(() => route.params.id as string)
 
@@ -152,6 +163,30 @@ function formatTime(dateStr: string): string {
   if (hours < 24) return `${hours}H`
   if (days < 7) return `${days}D`
   return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }).toUpperCase()
+}
+
+async function handleDeleteConversation(e: MouseEvent, conversationId: string) {
+  e.preventDefault()
+  e.stopPropagation()
+  
+  if (!confirm('确定要删除这个会话吗？删除后无法恢复。')) {
+    return
+  }
+
+  try {
+    deletingId.value = conversationId
+    await chatStore.deleteConversation(conversationId)
+    await chatStore.fetchConversations()
+    success('会话已删除')
+    if (route.params.id === conversationId) {
+      router.push('/chat')
+    }
+  } catch (err) {
+    error('删除失败，请重试')
+    console.error(err)
+  } finally {
+    deletingId.value = null
+  }
 }
 
 onMounted(() => {
@@ -369,6 +404,41 @@ onMounted(() => {
   background-color: var(--color-primary);
   border-radius: 50%;
   box-shadow: 0 0 0 2px var(--color-bg-canvas);
+}
+
+.delete-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s;
+  color: var(--color-text-tertiary);
+  margin-left: 4px;
+}
+
+.delete-btn:hover {
+  background-color: var(--color-error);
+  color: white;
+  opacity: 1;
+}
+
+.conv-item:hover .delete-btn {
+  opacity: 0.6;
+}
+
+.conv-item:hover .delete-btn:hover {
+  opacity: 1;
+}
+
+.delete-icon {
+  width: 14px;
+  height: 14px;
 }
 
 .sidebar-empty {

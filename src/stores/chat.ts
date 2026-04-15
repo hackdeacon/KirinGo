@@ -9,6 +9,7 @@ import {
   fetchMessages as loadMessages,
   markConversationRead,
   sendConversationMessage,
+  deleteConversation as deleteConversationDB,
 } from '@/lib/database'
 import type { Conversation, Message } from '@/types'
 import { useAuthStore } from './auth'
@@ -143,15 +144,39 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
+  async function deleteConversation(conversationId: string) {
+    try {
+      error.value = ''
+      await deleteConversationDB(conversationId)
+      
+      // 从列表移除
+      conversations.value = conversations.value.filter(c => c.id !== conversationId)
+      // 清除缓存
+      if (messagesCache.value[conversationId]) {
+        delete messagesCache.value[conversationId]
+      }
+      // 如果删除的是当前会话，清空消息
+      if (messages.value.length && currentConversation.value?.id === conversationId) {
+        messages.value = []
+        currentConversation.value = null
+      }
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '删除会话失败'
+      throw err
+    }
+  }
+
   return {
     conversations,
     currentConversation,
     messages,
+    messagesCache,
     loading,
     error,
     fetchConversations,
     fetchMessages,
     sendMessage,
+    deleteConversation,
     subscribeToMessages,
   }
 })
