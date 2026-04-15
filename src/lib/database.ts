@@ -894,6 +894,9 @@ export async function fetchCandidateResumes(page = 1, pageSize = 20, filters?: {
 
   let candidates = (allData ?? []) as (Resume & { user: Profile })[]
 
+  // Remove candidates where user is null (this happens when foreign key filter doesn't match)
+  candidates = candidates.filter(resume => resume.user != null)
+
   // Client-side filtering for minimum degree - this is simple and reliable
   const degreeOrder: Record<string, number> = {
     '大专': 1,
