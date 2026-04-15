@@ -170,7 +170,6 @@ const optimizing = ref(false)
 const analyzeIndex = ref(-1)
 const originalScore = ref(0)
 const optimizedScore = ref(0)
-const optimizedEvaluation = ref('')
 
 const steps = ['准备分析', 'AI 深度诊断', '查看优化建议']
 const analyzeSteps = [
@@ -216,33 +215,34 @@ async function startOptimize() {
   try {
     const systemPrompt = `你是一位资深的人力资源专家和简历优化师。你的任务是分析求职者的简历，给出专业的优化建议和优化后的内容。
 
-请从以下维度进行分析：
-1. 自我评价是否突出个人价值
-2. 工作经历描述是否量化、有说服力
-3. 项目经历是否突出技术亮点和成果
-4. 技能是否按照重要程度排序
-5. 整体结构是否符合行业最佳实践
+请全面优化简历，为每个需要改进的部分提供独立的优化建议：
+1. **自我评价** - 如果自我评价需要改进，请提供优化版本，让它更突出个人核心价值和优势
+2. **工作经历** - 对每个描述不够突出的工作经历，提供量化优化后的版本
+3. **项目经历** - 对每个描述不够突出的项目经历，提供突出技术亮点和成果的优化版本
+4. **技能标签** - 如果技能列表需要整理（排序、去重、归类），请提供优化后的完整技能列表
 
-返回 JSON 格式的优化建议。`
+每一项优化都作为独立的 suggestion 返回，确保所有需要优化的内容都覆盖到。`
 
-    const userPrompt = `请分析并优化以下简历内容：
+    const userPrompt = `请全面分析并优化以下简历内容：
 
 姓名：${resume.value.basic_info?.name}
-自我评价：${resume.value.self_evaluation}
-工作经历：${JSON.stringify(resume.value.experience)}
-项目经历：${JSON.stringify(resume.value.projects)}
-技能：${resume.value.skills?.join(', ')}
+自我评价：${resume.value.self_evaluation || '(空)'}
+工作经历：${JSON.stringify(resume.value.experience || [])}
+项目经历：${JSON.stringify(resume.value.projects || [])}
+技能：${resume.value.skills?.join(', ') || '(空)'}
 
 重要规则：
 - 对于工作经历和项目经历，你只优化描述部分（description 字段）
 - 请不要修改时间（start/end）、公司名称、职位名称、项目名称、角色名称
 - original 字段只放描述部分的原文，不要包含时间、公司、职位
 - 优化只针对描述内容，让它更加量化、突出成果和影响力
+- 如果自我评价不为空且需要优化，请把优化后的自我评价也作为一条 suggestion 放入 suggestions 数组（category="自我评价"）
+- 如果技能需要优化整理，请把优化后的完整技能列表作为一条 suggestion（category="技能描述"）
+- 如果不需要优化某一部分，可以不输出，只输出需要优化的建议
 
 请以以下 JSON 格式返回：
 {
   "score": 简历评分(0-100),
-  "optimized_evaluation": "优化后的自我评价",
   "suggestions": [
     {
       "category": "分类(自我评价/工作经历/项目经历/技能描述)",
@@ -258,7 +258,6 @@ async function startOptimize() {
     const result = JSON.parse(resultText)
 
     optimizedScore.value = result.score
-    optimizedEvaluation.value = result.optimized_evaluation || ''
     suggestions.value = (result.suggestions || []).map((item: ResumeAISuggestion) => ({
       ...item,
       applied: false,
