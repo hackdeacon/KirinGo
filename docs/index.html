@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KirinGo 麒麟智聘 · 毕设答辩</title>
+<link rel="icon" type="image/svg+xml" href="https://cdn.simpleicons.org/supabase/3ECF8E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
@@ -172,6 +173,7 @@
   .frame-img.r-4x3{aspect-ratio:4/3;max-height:56vh}
   .frame-img.r-3x2{aspect-ratio:3/2;max-height:46vh}
   .frame-img.r-3x4{aspect-ratio:3/4;max-height:60vh}
+  .frame-img.r-21x9{aspect-ratio:21/9;max-height:48vh}
   .frame-img.r-1x1{aspect-ratio:1/1;max-height:50vh}
   .frame-img.h-16{height:16vh}
   .frame-img.h-18{height:18vh}
@@ -260,7 +262,7 @@
     font-family:var(--mono);
     font-size:max(12px,.92vw);
     letter-spacing:.16em;
-    text-transform:uppercase;
+    text-transform:none;
     opacity:.6;
   }
 
@@ -453,23 +455,23 @@
 <!-- 01 · 封面 -->
 <section class="slide hero dark">
   <div class="chrome">
-    <div>KirinGo Defense · Graduation Project</div>
-    <div>Vol.01</div>
+    <div>KirinGo · 麒麟智聘</div>
+    <div>Cover</div>
   </div>
   <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:80vh">
-    <div class="kicker" data-anim>麒麟智聘</div>
+    <div class="kicker" data-anim>毕业设计答辩</div>
     <h1 class="h-hero" data-anim style="font-size:8.6vw">KirinGo</h1>
     <h2 class="h-sub" data-anim>基于 AI 与无服务器架构的智能招聘平台设计与实现</h2>
     <p class="lead" style="max-width:64vw" data-anim>
-      面向求职者与招聘者双端，将简历优化、职位匹配、模拟面试与即时沟通串成一条 AI 原生招聘流程。
+      面向求职者与招聘者双端，<br>将简历优化、职位匹配、模拟面试与即时沟通串成一条 AI 原生招聘流程。
     </p>
     <div class="meta-row" data-anim>
-      <span>Vue3</span>/<span>Supabase</span>/<span>PostgreSQL + pgvector</span>/<span>LLM API</span>
+      <span>Vue3 + TypeScript</span>/<span>Supabase</span>/<span>PostgreSQL + pgvector</span>/<span>DeepSeek API</span>
     </div>
   </div>
   <div class="foot">
-    <div>毕业设计答辩</div>
-    <div>邱天麟 0120231116 / 指导教师 · 李彬</div>
+    <div>广东科学技术职业学院 · 计算机工程技术学院（人工智能学院）</div>
+    <div>23 计算机 7 班 · 邱天麟 0120231116 / 指导教师 · 李彬</div>
   </div>
 </section>
 
@@ -481,10 +483,10 @@
   </div>
   <div class="frame grid-2-6-6" style="padding-top:7vh;align-items:start">
     <div>
-      <div class="kicker" data-anim>今天讲什么</div>
+      <div class="kicker" data-anim>幻灯片</div>
       <h2 class="h-xl" data-anim>目录</h2>
       <p class="lead" style="margin-top:3vh;max-width:36vw" data-anim>
-        从行业问题出发，落到系统设计、AI 能力、测试验证与后续迭代。
+        从行业问题出发，落到系统设计、<br>AI 能力、测试验证与后续迭代。
       </p>
     </div>
     <div class="col" style="gap:1.2vh">
@@ -508,30 +510,30 @@
     <div>03 / 15</div>
   </div>
   <div class="frame" style="padding-top:6vh">
-    <div class="kicker" data-anim>为什么要做</div>
-    <h2 class="h-xl" data-anim>招聘链路里的效率缺口</h2>
+    <div class="kicker" data-anim>项目灵感</div>
+    <h2 class="h-xl" data-anim>研究背景与意义</h2>
     <p class="lead" style="max-width:72vw;margin-top:2.8vh" data-anim>
-      传统线上招聘已经完成“信息上网”，但还没有充分解决“理解匹配”和“流程协作”的问题。
+      充分解决招聘与求职中的效率问题。
     </p>
     <div class="grid-4" style="margin-top:6vh">
       <div class="stat-card" data-anim>
         <div class="stat-label">Pain 01</div>
-        <div class="stat-nb" style="font-size:4.3vw">信息差</div>
+        <div class="stat-nb" style="font-size:4.3vw">简历筛选难</div>
         <div class="stat-note">求职者难以判断岗位适配度，HR 面对海量简历筛选成本高。</div>
       </div>
       <div class="stat-card" data-anim>
         <div class="stat-label">Pain 02</div>
-        <div class="stat-nb" style="font-size:4.3vw">关键词</div>
+        <div class="stat-nb" style="font-size:4.3vw">匹配不准确</div>
         <div class="stat-note">传统匹配依赖关键词，难以识别同义表达、项目能力与岗位语义。</div>
       </div>
       <div class="stat-card" data-anim>
         <div class="stat-label">Pain 03</div>
-        <div class="stat-nb" style="font-size:4.3vw">准备弱</div>
+        <div class="stat-nb" style="font-size:4.3vw">前期准备难</div>
         <div class="stat-note">简历撰写、面试准备、职场沟通缺少连续的辅助工具。</div>
       </div>
       <div class="stat-card" data-anim>
         <div class="stat-label">Pain 04</div>
-        <div class="stat-nb" style="font-size:4.3vw">成本高</div>
+        <div class="stat-nb" style="font-size:4.3vw">维护成本高</div>
         <div class="stat-note">中小企业难以承担大型招聘平台的高额服务与运维成本。</div>
       </div>
     </div>
@@ -549,7 +551,7 @@
     <div>04 / 15</div>
   </div>
   <div class="frame" style="padding-top:6vh">
-    <div class="kicker" data-anim>已有平台做到哪一步</div>
+    <div class="kicker" data-anim>平台对比</div>
     <h2 class="h-xl" data-anim>国内外现状</h2>
     <div class="grid-2-6-6" style="margin-top:7vh">
       <div class="callout" data-anim="left">
@@ -562,14 +564,14 @@
       <div class="callout" data-anim="right">
         <div class="kicker" style="margin-bottom:2vh">Domestic Platforms</div>
         <p>
-          智联招聘、前程无忧、BOSS 直聘等也逐步提供 AI 简历优化、AI 面试、智能推荐，但功能常作为增值服务，轻量化与开源化方案仍不充分。
+          BOSS 直聘、智联招聘等平台也逐步提供 AI 简历优化、AI 面试、智能推荐，但功能常作为增值服务，轻量化与开源化方案仍不充分。
         </p>
         <span class="callout-src">AI Recruitment · China</span>
       </div>
     </div>
     <div class="rowline" style="margin-top:5vh" data-anim>
-      <div class="k">机会</div>
-      <div class="v">面向中小企业和个人用户，构建低成本、可扩展、AI 能力深度整合的招聘系统。</div>
+      <div class="k">创新点 · 机会</div>
+      <div class="v">麒麟智聘面向中小企业和个人用户，<br>构建低成本、可扩展、AI 能力深度整合的招聘系统。</div>
       <div class="m">KirinGo</div>
     </div>
   </div>
@@ -590,29 +592,29 @@
       <div class="kicker" data-anim>技术选型</div>
       <h2 class="h-hero" style="font-size:8vw" data-anim>核心技术栈</h2>
       <p class="lead" style="max-width:62vw;margin-top:2vh" data-anim>
-        前端强调组件化与类型安全，后端采用 BaaS 与 Edge Functions，把数据库、认证、存储、实时通讯和 AI 调用统一收束。
+        前端强调组件化与类型安全，后端采用 BaaS 与 Edge Functions，<br>把数据库、认证、存储、实时通讯和 AI 调用统一收束。
       </p>
     </div>
     <div class="grid-3" style="align-content:start">
       <div class="pillar" data-anim>
         <div class="ic"><i data-lucide="layers" class="ico-lg"></i></div>
         <div class="t">Vue3 + TypeScript</div>
-        <div class="d">Composition API、Vue Router、Pinia、动态导入，支撑复杂页面与状态管理。</div>
+        <div class="d">Vite、Tailwind CSS、Vue Router、Pinia，<br>动态导入，支撑复杂页面与状态管理。</div>
       </div>
       <div class="pillar" data-anim>
         <div class="ic"><i data-lucide="database" class="ico-lg"></i></div>
         <div class="t">Supabase + PostgreSQL</div>
-        <div class="d">Auth、Database、Storage、Realtime、RLS，形成无服务器后端基础。</div>
+        <div class="d">Auth、Database、Storage、Realtime、RLS，<br>形成无服务器、低代码后端基础。</div>
       </div>
       <div class="pillar" data-anim>
         <div class="ic"><i data-lucide="brain-circuit" class="ico-lg"></i></div>
-        <div class="t">GPT-4 + pgvector</div>
-        <div class="d">大语言模型完成理解与生成，1536 维 Embedding 完成语义匹配。</div>
+        <div class="t">LLM + pgvector</div>
+        <div class="d">大语言模型完成理解与生成，<br>多维 Embedding 完成语义匹配。</div>
       </div>
     </div>
   </div>
   <div class="foot">
-    <div>Vite · Tailwind CSS · Lucide · SSE</div>
+    <div>VERCEL Deployment</div>
     <div>Tech Stack</div>
   </div>
 </section>
@@ -624,7 +626,7 @@
     <div>06 / 15</div>
   </div>
   <div class="frame" style="padding-top:6vh">
-    <div class="kicker" data-anim>双角色 + AI 中台 + 公共基础能力</div>
+    <div class="kicker" data-anim>产品功能设计</div>
     <h2 class="h-xl" data-anim>系统需求分析</h2>
     <div class="grid-4" style="margin-top:6vh">
       <div class="pillar" data-anim>
@@ -635,16 +637,16 @@
       <div class="pillar" data-anim>
         <div class="ic"><i data-lucide="building-2" class="ico-lg"></i></div>
         <div class="t">招聘者端</div>
-        <div class="d">企业资料、职位管理、AI 职位解析、牛人搜索、申请处理、HR 沟通辅助。</div>
+        <div class="d">企业资料、职位管理、AI 职位解析、牛人搜索、流程处理、HR 沟通辅助。</div>
       </div>
       <div class="pillar" data-anim>
         <div class="ic"><i data-lucide="sparkles" class="ico-lg"></i></div>
         <div class="t">AI 能力矩阵</div>
-        <div class="d">简历解析、简历优化、职位解析、语义匹配、模拟面试、聊天回复建议。</div>
+        <div class="d">简历分析、简历优化、职位解析、语义匹配、模拟面试。</div>
       </div>
       <div class="pillar" data-anim>
         <div class="ic"><i data-lucide="shield-check" class="ico-lg"></i></div>
-        <div class="t">非功能需求</div>
+        <div class="t">性能与安全</div>
         <div class="d">首屏 3 秒内、页面切换 500ms 内、RLS 权限隔离、响应式与可维护性。</div>
       </div>
     </div>
@@ -666,7 +668,7 @@
       <div class="kicker" data-anim>四层架构</div>
       <h2 class="h-xl" style="font-size:5.8vw" data-anim>系统总体设计</h2>
       <p class="lead" style="margin-top:2.4vh" data-anim>
-        架构以“前端表现层、业务逻辑层、数据服务层、基础设施层”分层，核心后端能力由 Supabase 与 Edge Functions 承担。
+        架构以「前端表现层、业务逻辑层、数据服务层、基础设施层」分层，核心后端能力由 Supabase 与 Edge Functions 承担。
       </p>
       <div class="rowline" style="margin-top:4vh" data-anim>
         <div class="k">前端</div><div class="v">页面组件、路由管理、状态管理、公共组件</div><div class="m">Vue3</div>
@@ -703,7 +705,7 @@
   <div class="frame" style="padding-top:6vh">
     <div class="kicker" data-anim>功能如何组织</div>
     <h2 class="h-xl" data-anim>功能模块设计</h2>
-    <div class="grid-3" style="margin-top:6vh;align-content:start">
+    <div class="grid-3" style="margin-top:4vh;align-content:start;flex:none">
       <div class="callout" data-anim>
         <div class="kicker" style="margin-bottom:2vh">Jobseeker</div>
         简历管理、AI 优化、职位浏览、语义匹配、模拟面试、投递记录、即时通讯。
@@ -720,10 +722,10 @@
         <span class="callout-src">公共模块</span>
       </div>
     </div>
-    <div data-anim style="margin-top:6vh;padding-top:2.8vh;border-top:1px dashed rgba(127,127,127,.32)">
+    <div data-anim style="margin-top:2vh;padding-top:2.8vh;border-top:1px dashed rgba(127,127,127,.32)">
       <div class="pipeline-label">User Journey</div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1.2vw">
-        <div class="step" data-anim><div class="step-nb">01</div><div class="step-title">创建简历</div><div class="step-desc">结构化编辑或上传 PDF 解析。</div></div>
+        <div class="step" data-anim><div class="step-nb">01</div><div class="step-title">创建简历</div><div class="step-desc">结构化编辑。</div></div>
         <div class="step" data-anim><div class="step-nb">02</div><div class="step-title">职位匹配</div><div class="step-desc">向量搜索筛出高适配岗位。</div></div>
         <div class="step" data-anim><div class="step-nb">03</div><div class="step-title">AI 分析</div><div class="step-desc">生成优势、不足与投递建议。</div></div>
         <div class="step" data-anim><div class="step-nb">04</div><div class="step-title">投递沟通</div><div class="step-desc">申请记录与聊天会话联动。</div></div>
@@ -750,20 +752,22 @@
       <p class="lead" style="margin-top:2.4vh" data-anim>
         PostgreSQL 负责结构化业务数据，pgvector 负责简历与职位的语义向量检索，RLS 从数据库层面保障访问边界。
       </p>
-      <div class="grid-4" style="margin-top:4vh;gap:2vh 2vw">
-        <div class="stat-card" data-anim><div class="stat-label">User</div><div class="stat-nb" style="font-size:2.7vw">profiles</div><div class="stat-note">用户资料与角色</div></div>
-        <div class="stat-card" data-anim><div class="stat-label">Company</div><div class="stat-nb" style="font-size:2.7vw">companies</div><div class="stat-note">企业信息</div></div>
-        <div class="stat-card" data-anim><div class="stat-label">Job</div><div class="stat-nb" style="font-size:2.7vw">jobs</div><div class="stat-note">职位与 embedding</div></div>
-        <div class="stat-card" data-anim><div class="stat-label">Resume</div><div class="stat-nb" style="font-size:2.7vw">resumes</div><div class="stat-note">结构化简历</div></div>
-        <div class="stat-card" data-anim><div class="stat-label">Apply</div><div class="stat-nb" style="font-size:2.7vw">applications</div><div class="stat-note">投递与状态</div></div>
-        <div class="stat-card" data-anim><div class="stat-label">Chat</div><div class="stat-nb" style="font-size:2.7vw">messages</div><div class="stat-note">消息明细</div></div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:2vh 1.5vw;margin-top:4vh">
+        <div class="stat-card" data-anim><div class="stat-label">User</div><div class="stat-nb" style="font-size:2.2vw">profiles</div><div class="stat-note">用户资料与角色</div></div>
+        <div class="stat-card" data-anim><div class="stat-label">Company</div><div class="stat-nb" style="font-size:2.2vw">companies</div><div class="stat-note">企业信息</div></div>
+        <div class="stat-card" data-anim><div class="stat-label">Job</div><div class="stat-nb" style="font-size:2.2vw">jobs</div><div class="stat-note">职位与 embedding</div></div>
+        <div class="stat-card" data-anim><div class="stat-label">Resume</div><div class="stat-nb" style="font-size:2.2vw">resumes</div><div class="stat-note">结构化简历</div></div>
+        <div class="stat-card" data-anim><div class="stat-label">Apply</div><div class="stat-nb" style="font-size:2.2vw">applications</div><div class="stat-note">投递与状态</div></div>
+        <div class="stat-card" data-anim><div class="stat-label">Interview</div><div class="stat-nb" style="font-size:2.2vw">interviews</div><div class="stat-note">模拟面试记录</div></div>
+        <div class="stat-card" data-anim><div class="stat-label">Session</div><div class="stat-nb" style="font-size:2.2vw">conversations</div><div class="stat-note">会话主表</div></div>
+        <div class="stat-card" data-anim><div class="stat-label">Chat</div><div class="stat-nb" style="font-size:2.2vw">messages</div><div class="stat-note">消息明细</div></div>
       </div>
     </div>
-    <figure class="tile" data-anim style="margin-top:8vh">
-      <div class="frame-img r-4x3 fit-contain">
-        <img src="images/09-match-function.png" alt="match_jobs 向量搜索函数">
+    <figure class="tile" data-anim style="margin-top:12vh">
+      <div class="frame-img r-4x3">
+        <img src="images/supabase-schema-strckvkikwerpmehmslm.png" alt="match_jobs 向量搜索函数" style="width:100%;height:100%;object-fit:cover">
       </div>
-      <figcaption class="img-cap">match_jobs() · 1536 维向量相似度检索</figcaption>
+      <figcaption class="img-cap">Supabase 数据库表设计</figcaption>
     </figure>
   </div>
   <div class="foot">
@@ -825,10 +829,10 @@
     <div>11 / 15</div>
   </div>
   <div class="frame" style="padding-top:5vh">
-    <div class="kicker" data-anim>AI 不是外挂功能，而是流程引擎</div>
+    <div class="kicker" data-anim>AI 流程引擎</div>
     <h2 class="h-xl" data-anim>AI 核心能力</h2>
-    <p class="lead" style="max-width:72vw;margin-top:2.2vh" data-anim>
-      KirinGo 将大语言模型、Embedding 与向量检索组合，覆盖“解析、优化、匹配、对话、评估”五类智能动作。
+    <p class="lead" style="max-width:80vw;margin-top:2.2vh" data-anim>
+      将 LLM、Embedding 与向量检索组合，覆盖「解析、优化、匹配、对话、评估」五类智能动作。
     </p>
     <div class="grid-6" style="margin-top:4vh">
       <div class="stat-card" data-anim><div class="stat-label">AI 01</div><div class="stat-nb" style="font-size:3.4vw">简历解析</div><div class="stat-note">PDF 提取为结构化 JSON。</div></div>
@@ -856,9 +860,9 @@
     <h2 class="h-xl" data-anim>系统测试</h2>
     <div class="grid-2-6-6" style="margin-top:6vh">
       <div class="col" style="gap:1.2vh">
-        <div class="rowline" data-anim><div class="k">环境</div><div class="v">Windows 11 / macOS Sonoma，Chrome、Firefox、Edge、Safari，iOS 与 Android 移动端。</div><div class="m">Env</div></div>
-        <div class="rowline" data-anim><div class="k">工具</div><div class="v">Postman 接口测试、Chrome DevTools 性能分析、Jest 单元测试。</div><div class="m">Tool</div></div>
-        <div class="rowline" data-anim><div class="k">后端</div><div class="v">Supabase Cloud、PostgreSQL 16、pgvector 0.7.2、Vercel 生产部署。</div><div class="m">Cloud</div></div>
+        <div class="rowline" data-anim><div class="k">环境</div><div class="v">Windows / macOS / Linux<br>Chrome / Firefox / Edge / Safari<br>iOS / Android</div><div class="m">Env</div></div>
+        <div class="rowline" data-anim><div class="k">工具</div><div class="v">接口测试<br>Chrome DevTools 性能分析</div><div class="m">Tool</div></div>
+        <div class="rowline" data-anim><div class="k">后端</div><div class="v">Supabase Cloud<br>Vercel 生产部署</div><div class="m">Cloud</div></div>
       </div>
       <div class="grid-4" style="gap:2.4vh 2vw">
         <div class="stat-card" data-anim><div class="stat-label">Functional</div><div class="stat-nb" style="font-size:3.4vw">认证</div><div class="stat-note">注册、登录、重置密码、路由拦截。</div></div>
@@ -886,7 +890,7 @@
     <p class="lead" style="max-width:70vw;margin-top:2.2vh" data-anim>
       核心功能测试全部通过；性能、安全、兼容性测试均满足论文中的非功能性需求。
     </p>
-    <div class="grid-6" style="margin-top:5vh">
+    <div class="grid-6" style="margin-top:2vh;gap:2vh 3vw">
       <div class="stat-card" data-anim><div class="stat-label">First Paint</div><div class="stat-nb">2.1<span class="stat-unit">s</span></div><div class="stat-note">首屏加载小于 3s。</div></div>
       <div class="stat-card" data-anim><div class="stat-label">Route Switch</div><div class="stat-nb">200<span class="stat-unit">ms</span></div><div class="stat-note">页面切换平均响应。</div></div>
       <div class="stat-card" data-anim><div class="stat-label">Job Query</div><div class="stat-nb">150<span class="stat-unit">ms</span></div><div class="stat-note">职位列表查询平均响应。</div></div>
@@ -901,11 +905,37 @@
   </div>
 </section>
 
-<!-- 14 · 总结与展望 -->
+<!-- 14 · 视频演示 -->
+<section class="slide dark">
+  <div class="chrome">
+    <div>Demo · Video Showcase</div>
+    <div>14 / 16</div>
+  </div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker" data-anim>产品演示</div>
+    <h2 class="h-xl" data-anim>视频演示</h2>
+    <figure class="tile" data-anim style="margin-top:5vh">
+      <div class="frame-img r-21x9" style="background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:8px">
+        <video controls style="width:100%;height:100%;object-fit:contain">
+          <source src="https://rz.hackdeacon.cn/0429.mov" type="video/quicktime">
+          <source src="https://rz.hackdeacon.cn/0429.mov" type="video/mp4">
+          您的浏览器不支持视频播放，请<a href="https://rz.hackdeacon.cn/0429.mov" target="_blank" style="color:#3ECF8E;text-decoration:underline;margin:0 4px">点击下载</a>观看
+        </video>
+      </div>
+      <figcaption class="img-cap">KirinGo 麒麟智聘 · 核心功能演示</figcaption>
+    </figure>
+  </div>
+  <div class="foot">
+    <div>视频演示</div>
+    <div>Live Demo</div>
+  </div>
+</section>
+
+<!-- 15 · 总结与展望 -->
 <section class="slide light">
   <div class="chrome">
     <div>Conclusion · Future Work</div>
-    <div>14 / 15</div>
+    <div>15 / 16</div>
   </div>
   <div class="frame grid-2-6-6" style="padding-top:6vh;align-items:start">
     <div>
@@ -917,7 +947,7 @@
     </div>
     <div class="col" style="gap:1.2vh">
       <div class="rowline" data-anim><div class="k">成果</div><div class="v">实现求职者端、招聘者端、AI 能力矩阵与公共模块，形成完整招聘业务流程。</div><div class="m">01</div></div>
-      <div class="rowline" data-anim><div class="k">架构</div><div class="v">采用 Vue3 + Supabase 的无服务器架构，降低开发、部署与运维成本。</div><div class="m">02</div></div>
+      <div class="rowline" data-anim><div class="k">架构</div><div class="v">采用 Vue3 + Supabase + Vercel 的无服务器架构，降低开发、部署与运维成本。</div><div class="m">02</div></div>
       <div class="rowline" data-anim><div class="k">AI</div><div class="v">融合 LLM、Embedding、pgvector，提升职位匹配、简历优化和面试准备效率。</div><div class="m">03</div></div>
       <div class="rowline" data-anim><div class="k">展望</div><div class="v">后续可扩展多模态面试、企业团队协作、小程序与移动端、SSR 缓存、商业化套餐。</div><div class="m">04</div></div>
     </div>
@@ -928,25 +958,25 @@
   </div>
 </section>
 
-<!-- 15 · 致谢 + Q&A -->
+<!-- 16 · 致谢 + Q&A -->
 <section class="slide hero light">
   <div class="chrome">
-    <div>Thanks · Q&A</div>
-    <div>15 / 15</div>
+    <div>Thanks</div>
+    <div>16 / 16</div>
   </div>
   <div class="frame center" style="min-height:80vh">
     <div class="kicker" data-anim>致谢</div>
     <h2 class="h-hero" style="font-size:8.4vw" data-anim>感谢聆听</h2>
     <p class="lead" style="max-width:62vw;margin-top:3vh" data-anim>
-      感谢指导老师、开源社区、同学朋友与家人的支持。欢迎各位老师批评指正。
+      感谢指导老师、开源社区、同学朋友与家人的支持，欢迎各位老师批评指正。
     </p>
     <div class="meta-row" style="justify-content:center;margin-top:4vh" data-anim>
-      <span>KirinGo</span><span>AI Recruitment</span><span>Q&A</span>
+      <span>项目开源地址<br><u>github.com/hackdeacon/KirinGo</u></span>
     </div>
   </div>
   <div class="foot">
-    <div>致谢 + Q&A</div>
-    <div>Thank You</div>
+    <div>Q&A</div>
+    <div>Thank you for your attention</div>
   </div>
 </section>
 
