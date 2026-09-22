@@ -373,3 +373,20 @@ html.dark {
 html {
   transition: background-color 0.3s ease;
 }
+
+/* ============================================
+   Print Styles
+   ============================================ */
+@media print {
+  .app-header,
+  .app-footer,
+  .tab-bar,
+  .toast-container {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+}

@@ -259,8 +259,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { fetchCandidateResumes, ensureConversation } from '@/lib/database'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/composables/useToast'
@@ -277,6 +277,7 @@ import {
 } from 'lucide-vue-next'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const toast = useToast()
 
@@ -501,7 +502,26 @@ async function startChat(item: Resume & { user: Profile }) {
   }
 }
 
+function applyRouteQuery() {
+  const keyword = typeof route.query.keyword === 'string' ? route.query.keyword.trim() : ''
+  if (keyword) {
+    filters.value.skillsInput = keyword
+  }
+}
+
+watch(
+  () => route.query.keyword,
+  (newKeyword) => {
+    if (typeof newKeyword === 'string' && newKeyword.trim() !== filters.value.skillsInput.trim()) {
+      filters.value.skillsInput = newKeyword.trim()
+      page.value = 1
+      loadCandidates()
+    }
+  }
+)
+
 onMounted(() => {
+  applyRouteQuery()
   loadCandidates()
 })
 </script>

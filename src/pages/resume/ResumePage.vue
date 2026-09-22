@@ -3,8 +3,11 @@
     <div class="container-cursor">
       <div class="page-header">
         <h1 class="text-heading">{{ isViewMode ? '候选人简历' : '我的简历' }}</h1>
-        <div class="header-actions" v-if="!isViewMode">
-          <router-link to="/resume/ai-optimize" class="btn btn-orange" id="ai-optimize-btn">
+        <div class="header-actions">
+          <button class="btn btn-secondary" @click="handlePrintResume" title="打印或导出为 PDF">
+            <PrinterIcon class="icon-sm mr-1" /> 导出 / 打印
+          </button>
+          <router-link v-if="!isViewMode" to="/resume/ai-optimize" class="btn btn-orange" id="ai-optimize-btn">
             <ZapIcon class="icon-sm" /> AI 优化简历
           </router-link>
         </div>
@@ -478,6 +481,7 @@ import {
   Circle as CircleIcon,
   Github as GithubIcon,
   Globe as GlobeIcon,
+  Printer as PrinterIcon,
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -747,6 +751,10 @@ async function saveManualResume() {
   } finally {
     saving.value = false
   }
+}
+
+function handlePrintResume() {
+  window.print()
 }
 
 onMounted(() => {
@@ -1199,7 +1207,49 @@ onMounted(() => {
     align-items: flex-start;
     gap: 20px;
   }
-  .header-actions { width: 100%; }
+  .header-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
   .header-actions .btn { width: 100%; }
+}
+
+@media print {
+  .page-header,
+  .resume-editor,
+  .resume-sidebar,
+  .header-actions,
+  .error-state,
+  .loading-state {
+    display: none !important;
+  }
+  .resume-page {
+    padding: 0 !important;
+    background: #ffffff !important;
+    min-height: auto !important;
+  }
+  .container-cursor {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .resume-layout {
+    display: block !important;
+  }
+  .resume-main {
+    width: 100% !important;
+  }
+  .resume-preview {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+  .resume-section {
+    page-break-inside: avoid;
+  }
 }
 </style>
