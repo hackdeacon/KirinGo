@@ -42,7 +42,7 @@
                 </div>
               </div>
               <div v-else class="empty-jobs">
-                <p class="empty-jobs-text">您还没有发布过职位，可以使用自定义职位功能开始面试</p>
+                <p class="empty-jobs-text">暂无可选职位，您可以选择“自定义面试职位”直接输入心仪岗位开始面试</p>
               </div>
             </div>
 
@@ -112,11 +112,16 @@
         <!-- 面试头部 -->
         <div class="interview-header card">
           <div class="interview-info">
-            <span class="interview-badge tag-success">面试进行中</span>
+            <span class="interview-badge" :class="interviewEnded ? 'tag-muted' : 'tag-success'">
+              {{ interviewEnded ? '面试已结束' : '面试进行中' }}
+            </span>
             <span class="interview-job">{{ currentJobTitle }}</span>
           </div>
-          <button class="btn btn-ghost btn-sm" @click="endInterview" id="end-interview-btn">
+          <button v-if="!interviewEnded" class="btn btn-ghost btn-sm" @click="endInterview" id="end-interview-btn">
             结束面试
+          </button>
+          <button v-else class="btn btn-ghost btn-sm" @click="resetInterview">
+            返回列表
           </button>
         </div>
 
@@ -226,6 +231,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { marked } from 'marked'
 import { createInterview, fetchInterviews, fetchUserResume, updateInterview } from '@/lib/database'
 import { useAuthStore } from '@/stores/auth'
@@ -247,6 +253,7 @@ function renderMarkdown(content: string): string {
 const authStore = useAuthStore()
 const jobStore = useJobStore()
 const toast = useToast()
+const route = useRoute()
 
 type InterviewType = 'technical' | 'behavioral' | 'comprehensive'
 type InterviewDifficulty = 'easy' | 'medium' | 'hard'
@@ -522,12 +529,21 @@ function resolveInterviewContext() {
   }
 }
 
+function applyRouteQuery() {
+  const queryJobId = route.query.jobId as string | undefined
+  if (queryJobId && availableJobs.value.some(j => j.id === queryJobId)) {
+    jobSelectMode.value = 'existing'
+    selectedJobId.value = queryJobId
+  }
+}
+
 async function loadData() {
   if (!authStore.user) return
 
   try {
     await jobStore.fetchJobs()
     pastInterviews.value = await fetchInterviews(authStore.user.id)
+    applyRouteQuery()
   } catch (error: any) {
     toast.error(`加载面试数据失败：${error?.message || '请稍后重试'}`)
   }
@@ -1059,6 +1075,14 @@ onMounted(() => {
   padding: 4px 12px;
   font-weight: 600;
   border-radius: var(--radius-full);
+}
+.interview-badge.tag-success {
+  background-color: rgba(31, 138, 101, 0.12);
+  color: #1f8a65;
+}
+.interview-badge.tag-muted {
+  background-color: var(--color-bg-surface-300);
+  color: var(--color-text-secondary);
 }
 .interview-job {
   font-family: var(--font-sans);
