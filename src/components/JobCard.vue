@@ -31,9 +31,12 @@
           </div>
         </div>
         <div class="recruiter-info" v-if="job.recruiter">
-          <div class="recruiter-avatar">
-            {{ job.recruiter.full_name?.charAt(0) }}
-          </div>
+          <AppAvatar
+            :src="job.recruiter.avatar_url"
+            :alt="job.recruiter.full_name"
+            size="xs"
+            class="recruiter-avatar-comp"
+          />
           <span class="recruiter-name">{{ job.recruiter.full_name }}</span>
           <span class="recruiter-dot">·</span>
           <span class="recruiter-title">招聘者</span>
@@ -56,6 +59,7 @@
 import { computed } from 'vue'
 import type { Job } from '@/types'
 import { Zap as ZapIcon } from 'lucide-vue-next'
+import AppAvatar from '@/components/AppAvatar.vue'
 
 const props = defineProps<{
   job: Job

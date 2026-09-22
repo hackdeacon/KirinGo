@@ -1,20 +1,33 @@
 <template>
   <div class="job-list-page">
     <div class="container-cursor">
+      <!-- 招聘者模式下的顶部提示 -->
+      <div v-if="isRecruiter" class="recruiter-browse-banner card mb-6">
+        <div class="flex-between">
+          <div class="flex-center">
+            <UserIcon class="icon-sm text-primary mr-2" />
+            <span class="text-body-serif">您当前以招聘者身份浏览职位库。如需搜寻候选人，请前往</span>
+          </div>
+          <router-link to="/recruiter/candidates" class="btn btn-secondary btn-sm">
+            牛人搜索 <ArrowRightIcon class="icon-xs ml-1" />
+          </router-link>
+        </div>
+      </div>
+
       <div class="jobs-layout">
         <!-- 左侧: 筛选器侧边栏 (1/3) -->
         <aside class="filter-sidebar animate-fade-in-up">
           <div class="sidebar-inner">
             <!-- 搜索框 -->
             <div class="filter-section">
-              <h3 class="filter-section-title">{{ isRecruiter ? '寻找人才' : '搜索职位' }}</h3>
+              <h3 class="filter-section-title">搜索职位</h3>
               <div class="search-bar-v2">
                 <SearchIcon class="search-icon" />
                 <input
                   v-model="keyword"
                   type="text"
                   class="search-input"
-                  :placeholder="isRecruiter ? '搜索人才、技能或岗位...' : '搜索职位、公司或技能...'"
+                  placeholder="搜索职位、公司或技能..."
                   @keyup.enter="applyFilters"
                 />
                 <button class="search-submit-btn" @click="applyFilters">
@@ -86,7 +99,7 @@
           <!-- 结果信息 -->
           <div class="result-bar animate-fade-in-up">
             <span class="result-count">
-              找到 <span class="count-num text-mono">{{ filteredJobs.length }}</span> 个匹配{{ isRecruiter ? '人才' : '职位' }}
+              找到 <span class="count-num text-mono">{{ filteredJobs.length }}</span> 个匹配职位
             </span>
           </div>
 
@@ -133,7 +146,8 @@ import {
   MapPin as MapPinIcon,
   Briefcase as BriefcaseIcon,
   GraduationCap as GraduationCapIcon,
-  Coins as CoinsIcon
+  Coins as CoinsIcon,
+  User as UserIcon,
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -186,6 +200,16 @@ watch([selectedCity, selectedExp, selectedEdu, selectedSalary], () => {
   applyFilters()
 })
 
+watch(
+  () => route.query.keyword,
+  (newKeyword) => {
+    if (typeof newKeyword === 'string' && newKeyword !== keyword.value) {
+      keyword.value = newKeyword
+      applyFilters()
+    }
+  }
+)
+
 onMounted(async () => {
   await jobStore.fetchJobs()
 
@@ -224,6 +248,13 @@ onMounted(async () => {
   margin: 0 auto;
   padding: 0 24px;
   box-sizing: border-box;
+}
+
+.recruiter-browse-banner {
+  padding: 16px 24px;
+  background-color: var(--color-bg-surface-200);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
 }
 
 /* 新布局: 左侧筛选 + 右侧列表 */
