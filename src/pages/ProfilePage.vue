@@ -280,6 +280,7 @@ const themeOptions = [
 ]
 
 async function handleLogout() {
+  if (!confirm('确定要退出登录吗？')) return
   await authStore.signOut()
   toast.info('已退出登录')
   router.push('/auth/login')

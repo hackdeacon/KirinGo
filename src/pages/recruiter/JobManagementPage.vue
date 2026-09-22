@@ -100,10 +100,10 @@
               <span class="stat-val text-mono">{{ job.view_count || 0 }}</span>
               <span class="stat-lab">浏览量</span>
             </div>
-            <div class="stat-item">
-              <span class="stat-val text-mono">{{ applicationCounts.get(job.id) || 0 }}</span>
-              <span class="stat-lab">投递数</span>
-            </div>
+            <router-link to="/applications" class="stat-item stat-item-link" title="查看投递详情">
+              <span class="stat-val text-mono text-primary">{{ applicationCounts.get(job.id) || 0 }}</span>
+              <span class="stat-lab">投递数 ↗</span>
+            </router-link>
           </div>
 
           <div class="job-actions-v2">
@@ -519,6 +519,16 @@ onMounted(loadJobs)
   flex-direction: column;
   align-items: center;
   min-width: 70px;
+}
+
+.stat-item-link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.stat-item-link:hover {
+  opacity: 0.8;
 }
 
 .stat-val {
