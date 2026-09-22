@@ -223,10 +223,10 @@
             <div class="preview-card sidebar-card card mt-6">
               <h3 class="sidebar-card-title">效果预览</h3>
               <p class="preview-desc text-body-serif text-secondary mb-4">
-                保存信息后，求职者可以在公共主页看到您完整的公司介绍。
+                保存信息后，公司介绍与 Logo 将实时展示于您发布的所有职位详情页中。
               </p>
-              <router-link to="/companies" target="_blank" class="btn btn-ghost btn-sm w-full">
-                查看公司列表
+              <router-link to="/recruiter/jobs" class="btn btn-ghost btn-sm w-full">
+                查看我发布的职位
                 <ExternalLinkIcon class="icon-xs ml-1" />
               </router-link>
             </div>
