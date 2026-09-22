@@ -95,7 +95,26 @@
 
           <!-- 优化建议列表 -->
           <div class="suggestions-container">
-            <h2 class="text-mono mb-6">OPTIMIZATION SUGGESTIONS</h2>
+            <div class="suggestions-header flex-between mb-6">
+              <div>
+                <h2 class="text-mono">OPTIMIZATION SUGGESTIONS</h2>
+                <p class="text-tiny text-tertiary mt-1">
+                  已采纳 {{ appliedCount }} / {{ suggestions.length }} 项建议
+                </p>
+              </div>
+              <div class="suggestions-header-actions" v-if="suggestions.length">
+                <button
+                  class="btn btn-secondary btn-sm"
+                  @click="applyAllSuggestions"
+                  :disabled="allApplied"
+                  id="apply-all-btn"
+                >
+                  <CheckCheckIcon class="icon-xs mr-1" />
+                  {{ allApplied ? '已全部采纳' : '一键采纳全部' }}
+                </button>
+              </div>
+            </div>
+
             <div v-for="(sug, i) in suggestions" :key="i" class="suggestion-card card animate-fade-in" :style="{ animationDelay: `${i * 0.1}s` }">
               <div class="sug-header">
                 <span class="tag-pill">{{ sug.category }}</span>
@@ -120,10 +139,15 @@
                   <span class="text-mono text-xs block mb-1">RATIONALE:</span>
                   <p class="text-body-serif">{{ sug.reason }}</p>
                 </div>
-                <button class="btn btn-sm" :class="sug.applied ? 'btn-ghost' : 'btn-primary'" @click="applySuggestion(i)">
-                  <CheckIcon v-if="sug.applied" class="icon-xs" />
-                  {{ sug.applied ? '已采纳' : '采纳此建议' }}
-                </button>
+                <div class="sug-actions flex-center gap-2">
+                  <button class="btn btn-ghost btn-sm" @click="copyText(sug.optimized)" title="复制优化内容">
+                    <CopyIcon class="icon-xs mr-1" /> 复制
+                  </button>
+                  <button class="btn btn-sm" :class="sug.applied ? 'btn-ghost' : 'btn-primary'" @click="toggleSuggestion(i)">
+                    <CheckIcon v-if="sug.applied" class="icon-xs mr-1" />
+                    {{ sug.applied ? '已采纳 (撤回)' : '采纳此建议' }}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -149,7 +173,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { createDefaultResume, fetchUserResume, saveResume } from '@/lib/database'
 import { callLLMStream, LLM_API_KEY } from '@/lib/llmStream'
 import { useAuthStore } from '@/stores/auth'
@@ -162,7 +186,9 @@ import {
   ArrowRight as ArrowRightIcon,
   Sparkles as SparklesIcon,
   Save as SaveIcon,
-  RotateCcw as RotateCcwIcon
+  RotateCcw as RotateCcwIcon,
+  Copy as CopyIcon,
+  CheckCheck as CheckCheckIcon
 } from 'lucide-vue-next'
 
 const authStore = useAuthStore()
@@ -184,6 +210,8 @@ const analyzeSteps = [
 ]
 
 const suggestions = ref<Array<ResumeAISuggestion & { applied: boolean }>>([])
+const appliedCount = computed(() => suggestions.value.filter(s => s.applied).length)
+const allApplied = computed(() => suggestions.value.length > 0 && appliedCount.value === suggestions.value.length)
 
 async function loadResume() {
   if (!authStore.user) return
@@ -280,7 +308,16 @@ async function startOptimize() {
   }
 }
 
-function applySuggestion(index: number) {
+function toggleSuggestion(index: number) {
+  const sug = suggestions.value[index]
+  if (sug.applied) {
+    revertSuggestion(index)
+  } else {
+    applySuggestion(index, true)
+  }
+}
+
+function applySuggestion(index: number, showToast = true) {
   const sug = suggestions.value[index]
   sug.applied = true
 
@@ -293,12 +330,9 @@ function applySuggestion(index: number) {
       break
     case '工作经历':
     case '工作经验':
-      // 模糊匹配找到对应工作经历进行更新
       if (resume.value.experience) {
-        // First try exact match
         let exp = resume.value.experience.find(e => e.description === sug.original)
         if (!exp) {
-          // If no exact match, try fuzzy match - description contains original text
           const originalClean = sug.original.trim().toLowerCase()
           exp = resume.value.experience.find(e =>
             e.description?.trim().toLowerCase().includes(originalClean)
@@ -306,19 +340,16 @@ function applySuggestion(index: number) {
         }
         if (exp) {
           exp.description = sug.optimized
-        } else {
+        } else if (showToast) {
           toast.warning(`未找到匹配的工作经历，请手动复制：\n${sug.optimized}`)
         }
       }
       break
     case '项目经历':
     case '项目经验':
-      // 模糊匹配找到对应项目经历进行更新
       if (resume.value.projects) {
-        // First try exact match
         let proj = resume.value.projects.find(p => p.description === sug.original)
         if (!proj) {
-          // If no exact match, try fuzzy match - description contains original text
           const originalClean = sug.original.trim().toLowerCase()
           proj = resume.value.projects.find(p =>
             p.description?.trim().toLowerCase().includes(originalClean)
@@ -326,23 +357,84 @@ function applySuggestion(index: number) {
         }
         if (proj) {
           proj.description = sug.optimized
-        } else {
+        } else if (showToast) {
           toast.warning(`未找到匹配的项目经历，请手动复制：\n${sug.optimized}`)
         }
       }
       break
     case '技能描述':
     case '技能':
-      // 技能整体替换
       resume.value.skills = sug.optimized.split(/[,\n]/).map(s => s.trim()).filter(Boolean)
       break
     default:
-      // Unknown category, let user copy manually
-      toast.warning(`未知分类 "${sug.category}"，请手动复制优化内容：\n${sug.optimized}`)
+      if (showToast) {
+        toast.warning(`未知分类 "${sug.category}"，请手动复制优化内容：\n${sug.optimized}`)
+      }
       break
   }
 
-  toast.success('已应用优化方案')
+  if (showToast) {
+    toast.success('已应用优化方案')
+  }
+}
+
+function revertSuggestion(index: number) {
+  const sug = suggestions.value[index]
+  sug.applied = false
+
+  if (!resume.value) return
+
+  switch (sug.category) {
+    case '自我评价':
+      resume.value.self_evaluation = sug.original
+      break
+    case '工作经历':
+    case '工作经验':
+      if (resume.value.experience) {
+        const exp = resume.value.experience.find(e => e.description === sug.optimized)
+        if (exp) {
+          exp.description = sug.original
+        }
+      }
+      break
+    case '项目经历':
+    case '项目经验':
+      if (resume.value.projects) {
+        const proj = resume.value.projects.find(p => p.description === sug.optimized)
+        if (proj) {
+          proj.description = sug.original
+        }
+      }
+      break
+    case '技能描述':
+    case '技能':
+      resume.value.skills = sug.original.split(/[,\n]/).map(s => s.trim()).filter(Boolean)
+      break
+  }
+
+  toast.info('已撤回该项建议')
+}
+
+function applyAllSuggestions() {
+  suggestions.value.forEach((_, idx) => {
+    if (!suggestions.value[idx].applied) {
+      applySuggestion(idx, false)
+    }
+  })
+  toast.success('已一键采纳所有优化建议')
+}
+
+async function copyText(text: string) {
+  try {
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(text)
+      toast.success('已复制优化内容到剪贴板')
+    } else {
+      toast.info(`内容：${text}`)
+    }
+  } catch (_e) {
+    toast.info(`内容：${text}`)
+  }
 }
 
 async function saveOptimized() {
