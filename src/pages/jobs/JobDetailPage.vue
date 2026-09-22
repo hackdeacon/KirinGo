@@ -106,8 +106,22 @@
               >
                 <MessageSquareIcon class="icon-sm mr-2" /> 和 TA 聊聊
               </button>
+              <router-link
+                v-if="authStore.isJobseeker"
+                :to="{ path: '/interview', query: { jobId: job.id } }"
+                class="btn btn-secondary btn-lg btn-block mt-3 flex-center-btn"
+              >
+                <SparklesIcon class="icon-sm mr-2" /> 针对该岗位 AI 模拟面试
+              </router-link>
             </template>
-            <div v-if="!authStore.isAuthenticated" class="login-hint card-sm">
+            <button
+              class="btn btn-ghost btn-sm btn-block mt-3 flex-center-btn"
+              @click="handleShareJob"
+              title="复制职位链接"
+            >
+              <Share2Icon class="icon-xs mr-2" /> 分享职位链接
+            </button>
+            <div v-if="!authStore.isAuthenticated" class="login-hint card-sm mt-3">
               <p class="text-body-serif">登录后即可一键投递并与招聘者在线沟通。</p>
               <router-link to="/auth/login" class="btn btn-primary btn-sm btn-block mt-3">立即登录</router-link>
             </div>
@@ -193,7 +207,8 @@ import {
   CheckCircle as CheckCircleIcon,
   Check as CheckIcon,
   MessageSquare as MessageSquareIcon,
-  Edit2 as EditIcon
+  Edit2 as EditIcon,
+  Share2 as Share2Icon,
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -351,6 +366,19 @@ async function handleChat() {
   }
 }
 
+async function handleShareJob() {
+  try {
+    if (navigator.clipboard && window.location.href) {
+      await navigator.clipboard.writeText(window.location.href)
+      toast.success('职位链接已复制到剪贴板')
+    } else {
+      toast.info(`职位链接: ${window.location.href}`)
+    }
+  } catch (_e) {
+    toast.info(`职位链接: ${window.location.href}`)
+  }
+}
+
 onMounted(async () => {
   const id = route.params.id as string
   await jobStore.fetchJobById(id)
@@ -392,6 +420,12 @@ onMounted(async () => {
 
 .back-btn:hover {
   color: var(--color-primary);
+}
+
+.flex-center-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .detail-layout {
