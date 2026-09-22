@@ -19,14 +19,14 @@
         <div class="footer-links-col">
           <h4 class="footer-col-title text-mono">PLATFORM</h4>
           <nav class="footer-links">
-            <router-link to="/jobs">{{ isRecruiter ? '寻找人才' : '职位搜索' }}</router-link>
+            <router-link :to="isRecruiter ? '/recruiter/candidates' : '/jobs'">{{ isRecruiter ? '寻找人才' : '职位搜索' }}</router-link>
             <template v-if="isJobseeker">
               <router-link to="/resume">简历诊断</router-link>
               <router-link to="/interview">AI 面试</router-link>
             </template>
             <template v-if="isRecruiter">
               <router-link to="/applications">人才管理</router-link>
-              <router-link to="/jobs">职位发布</router-link>
+              <router-link to="/recruiter/jobs/post">职位发布</router-link>
             </template>
             <router-link to="/chat">{{ isRecruiter ? '即时沟通' : '即时消息' }}</router-link>
           </nav>
