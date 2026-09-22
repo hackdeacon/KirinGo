@@ -83,6 +83,7 @@
 
             <!-- 操作 -->
             <div class="app-actions">
+              <button v-if="isRecruiter" class="btn btn-outline btn-sm" @click="viewCandidateResume(app)">查看简历</button>
               <button class="btn btn-outline btn-sm" @click="startConversation(app)">💬 沟通</button>
               <button
                 v-if="!isRecruiter && app.status === 'pending'"
@@ -110,7 +111,7 @@
         <div class="empty-state-icon">📭</div>
         <div class="empty-state-title">{{ loading ? '加载中...' : (isRecruiter ? '暂无收到的简历' : '暂无投递记录') }}</div>
         <div class="empty-state-desc">{{ isRecruiter ? '发布职位后，求职者的投递将出现在这里' : '去浏览职位并投递吧' }}</div>
-        <router-link to="/jobs" class="btn btn-primary" style="margin-top: 16px">
+        <router-link :to="isRecruiter ? '/recruiter/jobs/post' : '/jobs'" class="btn btn-primary" style="margin-top: 16px">
           {{ isRecruiter ? '发布职位' : '浏览职位' }}
         </router-link>
       </div>
@@ -240,6 +241,22 @@ async function handleOfferResponse(appId: string, accepted: boolean) {
     }
   } catch (error: any) {
     toast.error(`更新状态失败：${error?.message || '请稍后重试'}`)
+  }
+}
+
+async function viewCandidateResume(app: Application) {
+  if (app.user_id) {
+    window.open(`/resume/view/${app.user_id}`, '_blank')
+    if (app.status === 'pending') {
+      try {
+        await saveApplicationStatus(app.id, 'viewed')
+        app.status = 'viewed'
+      } catch (_e) {
+        // silent fail on status mark
+      }
+    }
+  } else {
+    toast.error('未找到候选人简历信息')
   }
 }
 

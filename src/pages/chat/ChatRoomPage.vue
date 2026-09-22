@@ -143,8 +143,18 @@
       <!-- 右侧: 无职位信息状态 -->
       <aside class="job-info-sidebar empty-sidebar" v-else-if="conversation">
         <div class="empty-content text-center px-6">
-          <div class="section-label text-mono mb-8">NO JOB INFO</div>
-          <p class="text-body-serif text-tertiary">此会话未关联特定职位。</p>
+          <div class="section-label text-mono mb-4">{{ authStore.isRecruiter ? 'CANDIDATE INFO' : 'NO JOB INFO' }}</div>
+          <p class="text-body-serif text-tertiary mb-6">
+            {{ authStore.isRecruiter ? '该会话为直接沟通，点击下方按钮可快速查阅候选人完整简历。' : '此会话未关联特定职位。' }}
+          </p>
+          <router-link
+            v-if="authStore.isRecruiter && conversation.jobseeker_id"
+            :to="`/resume/view/${conversation.jobseeker_id}`"
+            target="_blank"
+            class="btn-primary-v2 w-full text-center py-3 inline-block"
+          >
+            查看候选人简历
+          </router-link>
         </div>
       </aside>
     </div>
@@ -157,10 +167,10 @@
         </div>
         <h1 class="text-display text-4xl mb-4">暂无消息</h1>
         <p class="text-body-serif text-lg mb-8 max-w-md mx-auto">
-          你还没有任何对话记录。去浏览一下职位，主动联系心仪的公司吧。
+          {{ authStore.isRecruiter ? '你还没有任何沟通记录。去牛人库中主动发掘人才，开启对话吧。' : '你还没有任何对话记录。去浏览一下职位，主动联系心仪的公司吧。' }}
         </p>
-        <router-link to="/jobs" class="btn-primary-v2 px-8 py-3">
-          浏览职位
+        <router-link :to="authStore.isRecruiter ? '/recruiter/candidates' : '/jobs'" class="btn-primary-v2 px-8 py-3">
+          {{ authStore.isRecruiter ? '寻找牛人' : '浏览职位' }}
         </router-link>
       </div>
     </div>
