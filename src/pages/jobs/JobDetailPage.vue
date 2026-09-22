@@ -383,6 +383,10 @@ onMounted(async () => {
   const id = route.params.id as string
   await jobStore.fetchJobById(id)
 
+  if (job.value) {
+    document.title = `${job.value.title} · ${job.value.company?.name || '麒麟智聘'}`
+  }
+
   if (authStore.user?.id && authStore.isJobseeker && job.value) {
     hasApplied.value = Boolean(await fetchApplicationForJob(id, authStore.user.id))
     await analyzeMatch()

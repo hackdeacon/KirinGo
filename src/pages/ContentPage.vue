@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { MessageSquare as MessageSquareIcon } from 'lucide-vue-next'
 
@@ -204,6 +204,12 @@ const pageTitle = computed(() => page.value.title)
 const currentCategory = computed(() => page.value.category)
 const lastUpdated = computed(() => page.value.updated)
 const pageContent = computed(() => page.value.content)
+
+watch(pageTitle, (title) => {
+  if (title && title !== '页面未找到') {
+    document.title = `${title} · KirinGo 麒麟智聘`
+  }
+}, { immediate: true })
 </script>
 
 <style scoped>
