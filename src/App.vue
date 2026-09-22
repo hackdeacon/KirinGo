@@ -22,7 +22,7 @@
         </div>
       </div>
 
-      <AppHeader v-if="!isAuthPage" />
+      <AppHeader v-if="!isAuthPage" @open-palette="openPalette" />
       <main :class="['main-content', { 'auth-main': isAuthPage }]">
         <router-view v-slot="{ Component, route }">
           <transition name="page" mode="out-in">
@@ -38,6 +38,15 @@
       </main>
       <AppFooter v-if="showFooter" />
       <TabBar v-if="showTabBar" />
+
+      <!-- 全局 AI 智能智囊 Copilot 悬浮舱 -->
+      <KirinCopilot v-if="!isAuthPage" />
+
+      <!-- 全局 Command Palette (⌘K 搜寻中心) -->
+      <CommandPalette ref="paletteRef" />
+
+      <!-- 全局 AI 引擎与 API Key 配置弹窗 -->
+      <AISettingsModal />
     </template>
   </div>
 </template>
@@ -51,6 +60,9 @@ import { useThemeStore } from '@/stores/theme'
 import AppHeader from '@/components/AppHeader.vue'
 import AppFooter from '@/components/AppFooter.vue'
 import TabBar from '@/components/TabBar.vue'
+import CommandPalette from '@/components/CommandPalette.vue'
+import KirinCopilot from '@/components/KirinCopilot.vue'
+import AISettingsModal from '@/components/AISettingsModal.vue'
 import {
   CheckCircle as CheckCircleIcon,
   AlertCircle as AlertCircleIcon,
@@ -62,6 +74,12 @@ const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const { toasts } = useToast()
+
+const paletteRef = ref<InstanceType<typeof CommandPalette>>()
+
+function openPalette() {
+  paletteRef.value?.open()
+}
 
 // Auth 初始化完成后才显示 UI，杜绝闪烁
 const authReady = computed(() => !authStore.loading)

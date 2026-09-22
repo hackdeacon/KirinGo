@@ -18,6 +18,23 @@ interface LLMProviderConfig {
 function getProviderChain(): LLMProviderConfig[] {
   const providers: LLMProviderConfig[] = []
 
+  // 0. User Custom Key (localStorage - TOP PRIORITY)
+  try {
+    const customKey = (localStorage.getItem('kiringo_custom_api_key') || '').trim()
+    if (customKey) {
+      const customBase = (localStorage.getItem('kiringo_custom_base_url') || 'https://api.chatanywhere.tech/v1').trim().replace(/\/$/, '')
+      const customModel = (localStorage.getItem('kiringo_custom_model') || 'gpt-4o-mini').trim()
+      providers.push({
+        apiKey: customKey,
+        baseUrl: customBase,
+        model: customModel,
+        name: 'UserCustom',
+      })
+    }
+  } catch (_e) {
+    // ignore
+  }
+
   // 1. ChatAnywhere - highest priority
   if (import.meta.env.VITE_CHATANYWHERE_API_KEY) {
     providers.push({

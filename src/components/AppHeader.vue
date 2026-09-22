@@ -34,6 +34,10 @@
               <span v-else class="badge-number">9+</span>
             </template>
           </router-link>
+          <button class="nav-palette-btn" @click="emitOpenPalette" title="全局搜索 (⌘K)">
+            <SearchIcon class="icon-xs" />
+            <span class="palette-btn-text">⌘K</span>
+          </button>
         </nav>
       </div>
 
@@ -92,6 +96,10 @@
                     </router-link>
                   </template>
 
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item" @click="openAISettings">
+                    <SparklesIcon class="icon-sm text-primary" /> AI 引擎设置
+                  </button>
                   <div class="dropdown-divider"></div>
                   <div class="theme-selector">
                     <span class="theme-label text-mono">主题</span>
@@ -178,6 +186,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useThemeStore } from '@/stores/theme'
 import { useChatStore } from '@/stores/chat'
+import { useAIConfigStore } from '@/stores/aiConfig'
 import AppAvatar from '@/components/AppAvatar.vue'
 import {
   User as UserIcon,
@@ -191,13 +200,29 @@ import {
   Settings as SettingsIcon,
   Briefcase as BriefcaseIcon,
   PlusCircle as PlusIcon,
-  Search as SearchIcon
+  Search as SearchIcon,
+  Sparkles as SparklesIcon
 } from 'lucide-vue-next'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const chatStore = useChatStore()
+const aiConfig = useAIConfigStore()
+
+const emit = defineEmits<{
+  (e: 'openPalette'): void
+}>()
+
+function openAISettings() {
+  closeAll()
+  aiConfig.openSettings()
+}
+
+function emitOpenPalette() {
+  closeAll()
+  emit('openPalette')
+}
 
 const showMenu = ref(false)
 const mobileMenuOpen = ref(false)
@@ -419,6 +444,28 @@ onUnmounted(() => {
 .nav-link.active {
   background: var(--color-bg-surface-300);
   color: var(--color-text-primary);
+}
+
+.nav-palette-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: var(--color-bg-surface-300);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 4px;
+}
+
+.nav-palette-btn:hover {
+  background: var(--color-bg-surface-100);
+  color: var(--color-primary);
+  border-color: var(--color-border-strong);
 }
 
 .badge-dot {
